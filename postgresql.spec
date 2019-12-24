@@ -4,7 +4,7 @@
 
 Name:          postgresql
 Version:       10.5
-Release:       6
+Release:       7
 Summary:       PostgreSQL client programs
 License:       PostgreSQL
 Url:           http://www.postgresql.org/
@@ -27,6 +27,8 @@ Patch0003:     0003-postgresql-man.patch
 
 Patch6000:     6000-CVE-2019-10164-1.patch
 Patch6001:     6001-CVE-2019-10164-2.patch
+Patch6002:     CVE-2019-10208.patch
+Patch6003:     CVE-2018-16850.patch
 
 BuildRequires: gcc perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk perl(ExtUtils::Embed)
 BuildRequires: perl-devel perl-generators readline-devel zlib-devel systemd systemd-devel
@@ -188,6 +190,7 @@ PostgreSQL database management system, including regression tests and benchmarks
 
 %patch6000 -p1
 %patch6001 -p1
+%patch6002 -p1
 
 cp -p %{SOURCE1} .
 tar xfj %{SOURCE3}
@@ -565,5 +568,11 @@ make -C postgresql-setup-8.2 check
 %attr(-,postgres,postgres) %{_libdir}/pgsql/test
 
 %changelog
+* Tue Dec 24 2019 fengbing <fengbing7@huawei.com> - 10.5-7
+- Type:cves
+- ID:CVE-2019-10208 CVE-2018-16850
+- SUG:restart
+- DESC: fix CVE-2019-10208 CVE-2018-16850
+
 * Fri Nov 15 2019 yanzhihua<yanzhihua4@huawei.com> - 10.5-6
 - Package init
