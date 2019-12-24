@@ -191,6 +191,7 @@ PostgreSQL database management system, including regression tests and benchmarks
 %patch6000 -p1
 %patch6001 -p1
 %patch6002 -p1
+%patch6003 -p1
 
 cp -p %{SOURCE1} .
 tar xfj %{SOURCE3}
