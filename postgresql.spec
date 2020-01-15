@@ -4,7 +4,7 @@
 
 Name:          postgresql
 Version:       10.5
-Release:       7
+Release:       8
 Summary:       PostgreSQL client programs
 License:       PostgreSQL
 Url:           http://www.postgresql.org/
@@ -32,7 +32,7 @@ Patch6003:     CVE-2018-16850.patch
 
 BuildRequires: gcc perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk perl(ExtUtils::Embed)
 BuildRequires: perl-devel perl-generators readline-devel zlib-devel systemd systemd-devel
-BuildRequires: util-linux  multilib-rpm-config m4 elinks docbook-utils help2man python2-devel
+BuildRequires: util-linux m4 elinks docbook-utils help2man python2-devel
 BuildRequires: python3-devel tcl-devel openssl-devel krb5-devel openldap-devel gettext >= 0.10.35
 BuildRequires: uuid-devel libxml2-devel libxslt-devel pam-devel systemtap-sdt-devel libselinux-devel
 Requires:      %{name}-libs = %{version}-%{release}
@@ -338,13 +338,6 @@ mv -f src/Makefile.global.save src/Makefile.global
 install -d -m 755 $RPM_BUILD_ROOT%{_datadir}/pgsql/contrib
 install -d -m 755 $RPM_BUILD_ROOT%{_datadir}/pgsql/extension
 
-for header in %{_includedir}/pg_config.h %{_includedir}/pg_config_ext.h \
-        %{_includedir}/ecpg_config.h %{_includedir}/pgsql/server/pg_config.h \
-        %{_includedir}/pgsql/server/pg_config_ext.h
-do
-%multilib_fix_c_header --file "$header"
-done
-
 install -d -m 755 $RPM_BUILD_ROOT%{_libdir}/pgsql/tutorial
 cp -p src/tutorial/* $RPM_BUILD_ROOT%{_libdir}/pgsql/tutorial
 
@@ -569,6 +562,12 @@ make -C postgresql-setup-8.2 check
 %attr(-,postgres,postgres) %{_libdir}/pgsql/test
 
 %changelog
+* Mon Jan 13 2020 yanzhihua <yanzhihua4@huawei.com> - 10.5-8
+- Type: enhancement
+- ID: NA
+- SUG: NA
+- DESC: modify buildrequire
+
 * Tue Dec 24 2019 fengbing <fengbing7@huawei.com> - 10.5-7
 - Type:cves
 - ID:CVE-2019-10208 CVE-2018-16850
