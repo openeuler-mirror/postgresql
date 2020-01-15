@@ -1,29 +1,20 @@
 %global _default_patch_flags --no-backup-if-mismatch
-%global __provides_exclude_from %{_libdir}/pgsql
+%global __provides_exclude_from %{_libdir}/postgresql
 %global macrosdir %(d=%{_rpmconfigdir}/macros.d; [ -d $d ] || d=%{_sysconfdir}/rpm; echo $d)
 
 Name:          postgresql
 Version:       10.5
-Release:       8
+Release:       9
 Summary:       PostgreSQL client programs
 License:       PostgreSQL
-Url:           http://www.postgresql.org/
+URL:           http://www.postgresql.org/
 Source0:       https://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2
-Source1:       postgresql-%{version}-US.pdf
-Source2:       generate-pdf.sh
-Source3:       https://ftp.postgresql.org/pub/source/v9.6.10/postgresql-9.6.10.tar.bz2
-Source4:       Makefile.regress
-Source5:       postgresql.tmpfiles.d
-Source6:       postgresql.pam
-Source7:       postgresql-bashprofile
-Source8:       https://github.com/devexp-db/postgresql-setup/releases/download/v8.2/postgresql-setup-8.2.tar.gz
-Source9:       https://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2.sha256
-Source10:      https://ftp.postgresql.org/pub/source/v9.6.10/postgresql-9.6.10.tar.bz2.sha256
+Source1:       https://ftp.postgresql.org/pub/source/v9.6.10/postgresql-9.6.10.tar.bz2
+Source2:       https://github.com/devexp-db/postgresql-setup/releases/download/v8.2/postgresql-setup-8.2.tar.gz
+Source3:       https://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2.sha256
+Source4:       https://ftp.postgresql.org/pub/source/v9.6.10/postgresql-9.6.10.tar.bz2.sha256
 
-Patch0000:     0000-rpm-pgsql.patch
-Patch0001:     0001-postgresql-logging.patch
-Patch0002:     0002-postgresql-var-run-socket.patch
-Patch0003:     0003-postgresql-man.patch
+Patch0000:     0000-postgresql-var-run-socket.patch
 
 Patch6000:     6000-CVE-2019-10164-1.patch
 Patch6001:     6001-CVE-2019-10164-2.patch
@@ -179,22 +170,18 @@ PostgreSQL database management system, including regression tests and benchmarks
 %prep
 (
   cd "$(dirname "%{SOURCE0}")"
-  sha256sum -c %{SOURCE9}
-  sha256sum -c %{SOURCE10}
+  sha256sum -c %{SOURCE3}
+  sha256sum -c %{SOURCE4}
 )
-%setup -q -a 8
+%setup -q -a 2
 %patch0000 -p1
-%patch0001 -p1
-%patch0002 -p1
-%patch0003 -p1
 
 %patch6000 -p1
 %patch6001 -p1
 %patch6002 -p1
 %patch6003 -p1
 
-cp -p %{SOURCE1} .
-tar xfj %{SOURCE3}
+tar xfj %{SOURCE1}
 find . -type f -name .gitignore | xargs rm
 
 %build
@@ -222,7 +209,7 @@ common_configure_options='
 	--with-ldap --with-openssl --with-pam --with-gssapi --with-ossp-uuid
 	--with-libxml --with-libxslt --enable-nls --enable-dtrace
 	--with-selinux --with-system-tzdata=%_datadir/zoneinfo
-	--datadir=%_datadir/pgsql --with-systemd
+	--datadir=%_datadir/postgresql --with-systemd
 '
 
 export PYTHON=/usr/bin/python3
@@ -244,7 +231,7 @@ unset PYTHON
 
 %make_build world
 
-sed "s|C=\`pwd\`;|C=%{_libdir}/pgsql/tutorial;|" < src/tutorial/Makefile > src/tutorial/GNUmakefile
+sed "s|C=\`pwd\`;|C=%{_libdir}/postgresql/tutorial;|" < src/tutorial/Makefile > src/tutorial/GNUmakefile
 %make_build -C src/tutorial NO_PGXS=1 all
 
 rm -f src/tutorial/GNUmakefile src/tutorial/*.o
@@ -290,7 +277,7 @@ upgrade_configure ()
 {
         PYTHON="${PYTHON-/usr/bin/python2}" \
         CFLAGS="$CFLAGS -fno-aggressive-loop-optimizations" ./configure \
-                --build=%{_build} --host=%{_host} --prefix=%{_libdir}/pgsql/postgresql-9.6 \
+                --build=%{_build} --host=%{_host} --prefix=%{_libdir}/postgresql/postgresql-9.6 \
                 --disable-rpath --with-perl --with-tcl --with-tclconfig=%_libdir \
                 --with-system-tzdata=/usr/share/zoneinfo "$@"
 }
@@ -318,9 +305,9 @@ mv $RPM_BUILD_ROOT/%{_pkgdocdir}/README.rpm-dist ./
 cat > $RPM_BUILD_ROOT%{_sysconfdir}/postgresql-setup/upgrade/postgresql.conf <<EOF
 id              postgresql
 major           9.6
-data_default    %{_localstatedir}/pgsql/data
+data_default    %{_localstatedir}/postgresql/data
 package         postgresql-upgrade
-engine          %{_libdir}/pgsql/postgresql-9.6/bin
+engine          %{_libdir}/postgresql/postgresql-9.6/bin
 description     "Upgrade data from system PostgreSQL version (PostgreSQL 9.6)"
 redhat_sockets_hack no
 EOF
@@ -335,32 +322,24 @@ pushd src/pl/plpython3
 popd
 mv -f src/Makefile.global.save src/Makefile.global
 
-install -d -m 755 $RPM_BUILD_ROOT%{_datadir}/pgsql/contrib
-install -d -m 755 $RPM_BUILD_ROOT%{_datadir}/pgsql/extension
+install -d -m 755 $RPM_BUILD_ROOT%{_datadir}/postgresql/contrib
+install -d -m 755 $RPM_BUILD_ROOT%{_datadir}/postgresql/extension
 
-install -d -m 755 $RPM_BUILD_ROOT%{_libdir}/pgsql/tutorial
-cp -p src/tutorial/* $RPM_BUILD_ROOT%{_libdir}/pgsql/tutorial
-
-install -d $RPM_BUILD_ROOT/etc/pam.d
-install -m 644 %{SOURCE6} $RPM_BUILD_ROOT/etc/pam.d/postgresql
+install -d -m 755 $RPM_BUILD_ROOT%{_libdir}/postgresql/tutorial
+cp -p src/tutorial/* $RPM_BUILD_ROOT%{_libdir}/postgresql/tutorial
 
 install -d -m 755 $RPM_BUILD_ROOT%{?_localstatedir}/run/postgresql
 
-install -d $RPM_BUILD_ROOT%{_tmpfilesdir}
-install -m 0644 %{SOURCE5} $RPM_BUILD_ROOT%{_tmpfilesdir}/postgresql.conf
-
-install -d -m 700 $RPM_BUILD_ROOT%{?_localstatedir}/lib/pgsql/data
-install -d -m 700 $RPM_BUILD_ROOT%{?_localstatedir}/lib/pgsql/backups
-
-install -m 644 %{SOURCE7} $RPM_BUILD_ROOT%{?_localstatedir}/lib/pgsql/.bash_profile
+install -d -m 700 $RPM_BUILD_ROOT%{?_localstatedir}/lib/postgresql/data
+install -d -m 700 $RPM_BUILD_ROOT%{?_localstatedir}/lib/postgresql/backups
 
 pushd postgresql-9.6.10
 %make_install
 %make_install -C contrib
-install -m 755 plpython3.so $RPM_BUILD_ROOT/%_libdir/pgsql/postgresql-9.6/lib
+install -m 755 plpython3.so $RPM_BUILD_ROOT/%_libdir/postgresql/postgresql-9.6/lib
 popd
 
-pushd $RPM_BUILD_ROOT%{_libdir}/pgsql/postgresql-9.6
+pushd $RPM_BUILD_ROOT%{_libdir}/postgresql/postgresql-9.6
 rm bin/{clusterdb,createdb,createlang,createuser,dropdb,droplang,dropuser,ecpg}
 rm bin/{initdb,pg_basebackup,pg_dump,pg_dumpall,pg_restore,pgbench,psql,reindexdb,vacuumdb}
 rm -rf share/{doc,man,tsearch_data}
@@ -371,24 +350,20 @@ rm share/{*.bki,*description,*.sample,*.sql,*.txt}
 rm share/extension/{*.sql,*.control}
 popd
 cat <<EOF > $RPM_BUILD_ROOT%macrosdir/macros.%name-upgrade
-%%postgresql_upgrade_prefix %{_libdir}/pgsql/postgresql-9.6
+%%postgresql_upgrade_prefix %{_libdir}/postgresql/postgresql-9.6
 EOF
 
 
-install -d $RPM_BUILD_ROOT%{_libdir}/pgsql/test
-cp -a src/test/regress $RPM_BUILD_ROOT%{_libdir}/pgsql/test
-ln -sf ../../pgxs/src/test/regress/pg_regress $RPM_BUILD_ROOT%{_libdir}/pgsql/test/regress/pg_regress
-pushd  $RPM_BUILD_ROOT%{_libdir}/pgsql/test/regress
+install -d $RPM_BUILD_ROOT%{_libdir}/postgresql/test
+cp -a src/test/regress $RPM_BUILD_ROOT%{_libdir}/postgresql/test
+ln -sf ../../pgxs/src/test/regress/pg_regress $RPM_BUILD_ROOT%{_libdir}/postgresql/test/regress/pg_regress
+pushd  $RPM_BUILD_ROOT%{_libdir}/postgresql/test/regress
 rm -f GNUmakefile Makefile *.o
 chmod 0755 pg_regress regress.so
 popd
-sed 's|@bindir@|%{_bindir}|g' \
-        < %{SOURCE4} \
-        > $RPM_BUILD_ROOT%{_libdir}/pgsql/test/regress/Makefile
-chmod 0644 $RPM_BUILD_ROOT%{_libdir}/pgsql/test/regress/Makefile
 
 rm -rf doc/html
-mv $RPM_BUILD_ROOT%{_docdir}/pgsql/html doc
+mv $RPM_BUILD_ROOT%{_docdir}/postgresql/html doc
 
 find_lang_bins ()
 {
@@ -417,7 +392,7 @@ find_lang_bins pltcl.lst pltcl
 
 %pre server
 /usr/sbin/groupadd -g 26 -o -r postgres >/dev/null 2>&1 || :
-/usr/sbin/useradd -M -N -g postgres -o -r -d /var/lib/pgsql -s /bin/bash \
+/usr/sbin/useradd -M -N -g postgres -o -r -d /var/lib/postgresql -s /bin/bash \
         -c "PostgreSQL Server" -u 26 postgres >/dev/null 2>&1 || :
 
 %post server
@@ -443,13 +418,13 @@ make -C postgresql-setup-8.2 check
 %doc COPYRIGHT README
 %{_bindir}/{clusterdb,createdb,createuser,dropdb,dropuser,pg_dump,pg_dumpall}
 %{_bindir}/{pg_isready,pg_restore,pg_upgrade,psql,reindexdb,vacuumdb}
-%exclude %{_docdir}/pgsql
-%exclude %{_libdir}/pgsql/test/regress/pg_regress
+%exclude %{_docdir}/postgresql
+%exclude %{_libdir}/postgresql/test/regress/pg_regress
 %exclude %{_libdir}/lib{ecpg,pq,ecpg_compat,pgfeutils,pgtypes}.a
 
 %files libs -f libs.lst
 %doc COPYRIGHT
-%dir %{_libdir}/pgsql
+%dir %{_libdir}/postgresql
 %{_libdir}/libecpg.so.*
 %{_libdir}/libecpg_compat.so.*
 %{_libdir}/libpgtypes.so.*
@@ -457,9 +432,9 @@ make -C postgresql-setup-8.2 check
 
 
 %files help
-%doc *-US.pdf doc/html doc/KNOWN_BUGS doc/MISSING_FEATURES doc/TODO
+%doc doc/html doc/KNOWN_BUGS doc/MISSING_FEATURES doc/TODO
 %doc HISTORY doc/bug.template README.rpm-dist
-%{_libdir}/pgsql/tutorial/
+%{_libdir}/postgresql/tutorial/
 %{_mandir}/man1/*
 %{_mandir}/man3/*
 %{_mandir}/man7/*
@@ -468,53 +443,50 @@ make -C postgresql-setup-8.2 check
 %files contrib -f contrib.lst
 %doc contrib/spi/*.example
 %{_bindir}/{oid2name,pg_archivecleanup,pg_standby,pg_test_fsync,pg_test_timing,pg_waldump,pgbench,vacuumlo}
-%{_datadir}/pgsql/extension/{adminpack*,amcheck*,autoinc*,bloom*,btree_gin*,btree_gist*,chkpass*}
-%{_datadir}/pgsql/extension/{citext*,cube*,dblink*,dict_int*,dict_xsyn*,earthdistance*,file_fdw*,fuzzystrmatch*}
-%{_datadir}/pgsql/extension/{hstore*,insert_username*,intagg*,intarray*,isn*,lo*,ltree*,moddatetime*}
-%{_datadir}/pgsql/extension/{pageinspect*,pg_buffercache*,pg_freespacemap*,pg_prewarm*,pg_stat_statements*}
-%{_datadir}/pgsql/extension/{pg_trgm*,pg_visibility*,pgcrypto*,pgrowlocks*,pgstattuple*,postgres_fdw*}
-%{_datadir}/pgsql/extension/{refint*,seg*,tablefunc*,tcn*,timetravel*,tsm_system_rows*,tsm_system_time*}
-%{_datadir}/pgsql/extension/{unaccent*,sslinfo*,uuid-ossp*,xml2*}
-%{_datadir}/pgsql/contrib/sepgsql.sql
-%{_libdir}/pgsql/{_int,adminpack,amcheck,auth_delay,auto_explain,autoinc,bloom,btree_gin,btree_gist}.so
-%{_libdir}/pgsql/{chkpass,citext,cube,dblink,dict_int,dict_xsyn,earthdistance,file_fdw,fuzzystrmatch}.so
-%{_libdir}/pgsql/{hstore,hstore_plperl,hstore_plpython2,insert_username,isn,lo,ltree,ltree_plpython2}.so
-%{_libdir}/pgsql/{moddatetime,pageinspect,passwordcheck,pg_buffercache,pg_freespacemap,pg_stat_statements}.so
-%{_libdir}/pgsql/{pg_trgm,pg_visibility,pgcrypto,pgrowlocks,pgstattuple,postgres_fdw,refint}.so
-%{_libdir}/pgsql/{seg,tablefunc,tcn,test_decoding,timetravel,tsm_system_rows,tsm_system_time,unaccent}.so
-%{_libdir}/pgsql/{sepgsql,sslinfo,uuid-ossp,pgxml}.so
+%{_datadir}/postgresql/extension/{adminpack*,amcheck*,autoinc*,bloom*,btree_gin*,btree_gist*,chkpass*}
+%{_datadir}/postgresql/extension/{citext*,cube*,dblink*,dict_int*,dict_xsyn*,earthdistance*,file_fdw*,fuzzystrmatch*}
+%{_datadir}/postgresql/extension/{hstore*,insert_username*,intagg*,intarray*,isn*,lo*,ltree*,moddatetime*}
+%{_datadir}/postgresql/extension/{pageinspect*,pg_buffercache*,pg_freespacemap*,pg_prewarm*,pg_stat_statements*}
+%{_datadir}/postgresql/extension/{pg_trgm*,pg_visibility*,pgcrypto*,pgrowlocks*,pgstattuple*,postgres_fdw*}
+%{_datadir}/postgresql/extension/{refint*,seg*,tablefunc*,tcn*,timetravel*,tsm_system_rows*,tsm_system_time*}
+%{_datadir}/postgresql/extension/{unaccent*,sslinfo*,uuid-ossp*,xml2*}
+%{_datadir}/postgresql/contrib/sepgsql.sql
+%{_libdir}/postgresql/{_int,adminpack,amcheck,auth_delay,auto_explain,autoinc,bloom,btree_gin,btree_gist}.so
+%{_libdir}/postgresql/{chkpass,citext,cube,dblink,dict_int,dict_xsyn,earthdistance,file_fdw,fuzzystrmatch}.so
+%{_libdir}/postgresql/{hstore,hstore_plperl,hstore_plpython2,insert_username,isn,lo,ltree,ltree_plpython2}.so
+%{_libdir}/postgresql/{moddatetime,pageinspect,passwordcheck,pg_buffercache,pg_freespacemap,pg_stat_statements}.so
+%{_libdir}/postgresql/{pg_trgm,pg_visibility,pgcrypto,pgrowlocks,pgstattuple,postgres_fdw,refint}.so
+%{_libdir}/postgresql/{seg,tablefunc,tcn,test_decoding,timetravel,tsm_system_rows,tsm_system_time,unaccent}.so
+%{_libdir}/postgresql/{sepgsql,sslinfo,uuid-ossp,pgxml}.so
 
 
 %files server -f server.lst
 %{_bindir}/{initdb,pg_basebackup,pg_controldata,pg_ctl,pg_receivewal,pg_recvlogical}
 %{_bindir}/{pg_resetwal,pg_rewind,postgres,postgresql-setup,postmaster}
-%{_datadir}/pgsql/{conversion_create.sql,*.sample,extension/plpgsql*,information_schema.sql}
-%{_datadir}/pgsql/postgres.{bki,description,shdescription}
-%{_datadir}/pgsql/{snowball_create.sql,sql_features.txt,system_views.sql,timezonesets/,tsearch_data/}
+%{_datadir}/postgresql/{conversion_create.sql,*.sample,extension/plpgsql*,information_schema.sql}
+%{_datadir}/postgresql/postgres.{bki,description,shdescription}
+%{_datadir}/postgresql/{snowball_create.sql,sql_features.txt,system_views.sql,timezonesets/,tsearch_data/}
 %{_datadir}/postgresql-setup/library.sh
-%{_libdir}/pgsql/{*_and_*,dict_snowball,euc2004_sjis2004,libpqwalreceiver,pg_prewarm,pgoutput,plpgsql}.so
+%{_libdir}/postgresql/{*_and_*,dict_snowball,euc2004_sjis2004,libpqwalreceiver,pg_prewarm,pgoutput,plpgsql}.so
 %{_libexecdir}/initscripts/legacy-actions/postgresql/*
 %{_libexecdir}/postgresql-check-db-dir
 %{_sbindir}/postgresql-new-systemd-unit
-%{_tmpfilesdir}/postgresql.conf
 %{_unitdir}/*postgresql*.service
-%dir %{_datadir}/pgsql/{extension,contrib}
+%dir %{_datadir}/postgresql/{extension,contrib}
 %dir %{_datadir}/postgresql-setup
 %dir %{_libexecdir}/initscripts/legacy-actions/postgresql
 %dir %{_sysconfdir}/postgresql-setup/upgrade
-%attr(644,postgres,postgres) %config(noreplace) %{?_localstatedir}/lib/pgsql/.bash_profile
-%attr(700,postgres,postgres) %dir %{?_localstatedir}/lib/pgsql
-%attr(700,postgres,postgres) %dir %{?_localstatedir}/lib/pgsql/backups
-%attr(700,postgres,postgres) %dir %{?_localstatedir}/lib/pgsql/data
+%attr(700,postgres,postgres) %dir %{?_localstatedir}/lib/postgresql
+%attr(700,postgres,postgres) %dir %{?_localstatedir}/lib/postgresql/backups
+%attr(700,postgres,postgres) %dir %{?_localstatedir}/lib/postgresql/data
 %attr(755,postgres,postgres) %dir %{?_localstatedir}/run/postgresql
-%config(noreplace) /etc/pam.d/postgresql
 %config %{_sysconfdir}/postgresql-setup/upgrade/*.conf
 
 
 %files devel -f devel.lst
 %{_includedir}/*
 %{_bindir}/{ecpg,pg_config}
-%{_libdir}/{pgsql/pgxs/,pkgconfig/*.pc}
+%{_libdir}/{postgresql/pgxs/,pkgconfig/*.pc}
 %{_libdir}/{libecpg,libecpg_compat,libpgtypes,libpq}.so
 %{macrosdir}/macros.%name
 
@@ -528,40 +500,46 @@ make -C postgresql-setup-8.2 check
 
 
 %files upgrade
-%{_libdir}/pgsql/postgresql-9.6/{bin,lib,share}
-%exclude %{_libdir}/pgsql/postgresql-9.6/bin/pg_config
-%exclude %{_libdir}/pgsql/postgresql-9.6/lib/{pgxs,pkgconfig}
+%{_libdir}/postgresql/postgresql-9.6/{bin,lib,share}
+%exclude %{_libdir}/postgresql/postgresql-9.6/bin/pg_config
+%exclude %{_libdir}/postgresql/postgresql-9.6/lib/{pgxs,pkgconfig}
 
 
 %files upgrade-devel
-%{_libdir}/pgsql/postgresql-9.6/{include,bin/pg_config}
-%{_libdir}/pgsql/postgresql-9.6/lib/{pkgconfig,pgxs}
+%{_libdir}/postgresql/postgresql-9.6/{include,bin/pg_config}
+%{_libdir}/postgresql/postgresql-9.6/lib/{pkgconfig,pgxs}
 %{macrosdir}/macros.%name-upgrade
 
 
 %files plperl -f plperl.lst
-%{_datadir}/pgsql/extension/plperl*
-%{_libdir}/pgsql/plperl.so
+%{_datadir}/postgresql/extension/plperl*
+%{_libdir}/postgresql/plperl.so
 
 
 %files pltcl -f pltcl.lst
-%{_datadir}/pgsql/extension/pltcl*
-%{_libdir}/pgsql/pltcl.so
+%{_datadir}/postgresql/extension/pltcl*
+%{_libdir}/postgresql/pltcl.so
 
 
 %files plpython -f plpython.lst
-%{_datadir}/pgsql/extension/{plpython2*,plpythonu*}
-%{_libdir}/pgsql/plpython2.so
+%{_datadir}/postgresql/extension/{plpython2*,plpythonu*}
+%{_libdir}/postgresql/plpython2.so
 
 
 %files plpython3 -f plpython3.lst
-%{_datadir}/pgsql/extension/plpython3*
-%{_libdir}/pgsql/plpython3.so
+%{_datadir}/postgresql/extension/plpython3*
+%{_libdir}/postgresql/plpython3.so
 
 %files test
-%attr(-,postgres,postgres) %{_libdir}/pgsql/test
+%attr(-,postgres,postgres) %{_libdir}/postgresql/test
 
 %changelog
+* Tue Jan 14 2020 openEuler Buildteam <buildteam@openeuler.org> - 10.5-9
+- Type:enhancement
+- ID:NA
+- SUG:restart
+- DESC: remove useless files
+
 * Mon Jan 13 2020 yanzhihua <yanzhihua4@huawei.com> - 10.5-8
 - Type: enhancement
 - ID: NA
