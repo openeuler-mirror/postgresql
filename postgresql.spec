@@ -4,7 +4,7 @@
 
 Name:          postgresql
 Version:       10.5
-Release:       9
+Release:       10
 Summary:       PostgreSQL client programs
 License:       PostgreSQL
 URL:           http://www.postgresql.org/
@@ -20,6 +20,7 @@ Patch6000:     6000-CVE-2019-10164-1.patch
 Patch6001:     6001-CVE-2019-10164-2.patch
 Patch6002:     CVE-2019-10208.patch
 Patch6003:     CVE-2018-16850.patch
+Patch6004:     CVE-2019-10130.patch
 
 BuildRequires: gcc perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk perl(ExtUtils::Embed)
 BuildRequires: perl-devel perl-generators readline-devel zlib-devel systemd systemd-devel
@@ -180,6 +181,7 @@ PostgreSQL database management system, including regression tests and benchmarks
 %patch6001 -p1
 %patch6002 -p1
 %patch6003 -p1
+%patch6004 -p1
 
 tar xfj %{SOURCE1}
 find . -type f -name .gitignore | xargs rm
@@ -534,6 +536,12 @@ make -C postgresql-setup-8.2 check
 %attr(-,postgres,postgres) %{_libdir}/postgresql/test
 
 %changelog
+* Mon Feb 3 2020 chenli <chenli147@huawei.com> 10.5-10
+- Type:cve
+- ID:CVE-2019-10130
+- SUG: NA
+- DESC: fix CVE-2019-10130
+
 * Tue Jan 14 2020 openEuler Buildteam <buildteam@openeuler.org> - 10.5-9
 - Type:enhancement
 - ID:NA
