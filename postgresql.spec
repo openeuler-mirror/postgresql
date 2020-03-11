@@ -4,7 +4,7 @@
 
 Name:          postgresql
 Version:       10.5
-Release:       11
+Release:       12
 Summary:       PostgreSQL client programs
 License:       PostgreSQL
 URL:           http://www.postgresql.org/
@@ -27,8 +27,8 @@ Patch6004:     CVE-2019-10130.patch
 
 BuildRequires: gcc perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk perl(ExtUtils::Embed)
 BuildRequires: perl-devel perl-generators readline-devel zlib-devel systemd systemd-devel
-BuildRequires: util-linux m4 elinks docbook-utils help2man python2-devel
-BuildRequires: python3-devel tcl-devel openssl-devel krb5-devel openldap-devel gettext >= 0.10.35
+BuildRequires: util-linux m4 elinks docbook-utils help2man
+BuildRequires: python3 python3-devel tcl-devel openssl-devel krb5-devel openldap-devel gettext >= 0.10.35
 BuildRequires: uuid-devel libxml2-devel libxslt-devel pam-devel systemtap-sdt-devel libselinux-devel
 Requires:      %{name}-libs = %{version}-%{release}
 
@@ -134,17 +134,6 @@ This package contains the PL/Perl procedural language, which is an extension
 to the PostgreSQL database server.Install this if you want to write database
 functions in Perl.
 
-%package plpython
-Summary:       The Python2 procedural language for PostgreSQL
-Requires:      %{name}-server = %{version}-%{release}
-Provides:      %{name}-plpython2 = %{version}-%{release}
-
-%description plpython
-This package contains the PL/Python procedural language, which is an extension
-to the PostgreSQL database server.It is used when you want to write database
-functions in Python2.
-
-
 %package plpython3
 Summary:       The Python3 procedural language for PostgreSQL
 Requires:      %{name}-server = %{version}-%{release}
@@ -226,12 +215,6 @@ cp -a src/pl/plpython src/pl/plpython3
 
 cp src/Makefile.global src/Makefile.global.python3
 
-make distclean
-
-PYTHON=/usr/bin/python2
-
-%configure $common_configure_options --with-python
-
 unset PYTHON
 
 %make_build world
@@ -280,7 +263,7 @@ pushd postgresql-9.6.10
 
 upgrade_configure ()
 {
-        PYTHON="${PYTHON-/usr/bin/python2}" \
+        PYTHON="${PYTHON-/usr/bin/python3}" \
         CFLAGS="$CFLAGS -fno-aggressive-loop-optimizations" ./configure \
                 --build=%{_build} --host=%{_host} --prefix=%{_libdir}/pgsql/postgresql-9.6 \
                 --disable-rpath --with-perl --with-tcl --with-tclconfig=%_libdir \
@@ -389,7 +372,6 @@ find_lang_bins server.lst initdb pg_basebackup pg_controldata pg_ctl pg_resetwal
 find_lang_bins contrib.lst pg_archivecleanup pg_test_fsync pg_test_timing pg_waldump
 find_lang_bins main.lst pg_dump pg_upgrade pgscripts psql
 find_lang_bins plperl.lst plperl
-find_lang_bins plpython.lst plpython
 find_lang_bins plpython3.lst plpython
 find_lang_bins pltcl.lst pltcl
 
@@ -461,7 +443,7 @@ make -C postgresql-setup-8.2 check
 %{_datadir}/pgsql/contrib/sepgsql.sql
 %{_libdir}/pgsql/{_int,adminpack,amcheck,auth_delay,auto_explain,autoinc,bloom,btree_gin,btree_gist}.so
 %{_libdir}/pgsql/{chkpass,citext,cube,dblink,dict_int,dict_xsyn,earthdistance,file_fdw,fuzzystrmatch}.so
-%{_libdir}/pgsql/{hstore,hstore_plperl,hstore_plpython2,insert_username,isn,lo,ltree,ltree_plpython2}.so
+%{_libdir}/pgsql/{hstore,hstore_plperl,hstore_plpython3,insert_username,isn,lo,ltree,ltree_plpython3}.so
 %{_libdir}/pgsql/{moddatetime,pageinspect,passwordcheck,pg_buffercache,pg_freespacemap,pg_stat_statements}.so
 %{_libdir}/pgsql/{pg_trgm,pg_visibility,pgcrypto,pgrowlocks,pgstattuple,postgres_fdw,refint}.so
 %{_libdir}/pgsql/{seg,tablefunc,tcn,test_decoding,timetravel,tsm_system_rows,tsm_system_time,unaccent}.so
@@ -531,11 +513,6 @@ make -C postgresql-setup-8.2 check
 %{_libdir}/pgsql/pltcl.so
 
 
-%files plpython -f plpython.lst
-%{_datadir}/pgsql/extension/{plpython2*,plpythonu*}
-%{_libdir}/pgsql/plpython2.so
-
-
 %files plpython3 -f plpython3.lst
 %{_datadir}/pgsql/extension/plpython3*
 %{_libdir}/pgsql/plpython3.so
@@ -544,6 +521,10 @@ make -C postgresql-setup-8.2 check
 %attr(-,postgres,postgres) %{_libdir}/pgsql/test
 
 %changelog
+* Tue Mar 10 2020 steven <steven_ygui@163.com> 10.5-12
+- Type: enhancement
+- DESC: remove python2
+
 * Mon Mar 10 2020 yanzhihua <yanzhihua4@huawei.com> 10.5-11
 - Type: bug fix
 - ID: #I1AHMH
