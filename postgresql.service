@@ -1,0 +1,23 @@
+[Unit]
+Description=PostgreSQL database server
+After=network.target
+[Service]
+Type=notify
+
+User=postgres
+Group=postgres
+OOMScoreAdjust=-1000
+Environment=PG_OOM_ADJUST_FILE=/proc/self/oom_score_adj
+Environment=PG_OOM_ADJUST_VALUE=0
+Environment=PGDATA=/var/lib/pgsql/data
+
+ExecStartPre=/usr/libexec/postgresql-check-db-dir %N
+ExecStart=/usr/bin/postmaster -D ${PGDATA}
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=mixed
+KillSignal=SIGINT
+
+TimeoutSec=0
+
+[Install]
+WantedBy=multi-user.target
