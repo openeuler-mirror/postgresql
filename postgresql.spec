@@ -4,7 +4,7 @@
 
 Name:          postgresql
 Version:       10.5
-Release:       13
+Release:       14
 Summary:       PostgreSQL client programs
 License:       PostgreSQL
 URL:           http://www.postgresql.org/
@@ -19,6 +19,9 @@ Source8:       postgresql-setup
 Source9:       postgresql.service
 # https://github.com/devexp-db/postgresql-setup/blob/master/share/postgresql-setup/library.sh.in
 Source10:      library.sh
+Source11:      macros.postgresql
+Source12:      macros.postgresql-test
+Source13:      postgresql_pkg_tests.sh
 
 Patch0000:     0000-postgresql-var-run-socket.patch
 Patch0001:     0000-rpm-pgsql.patch
@@ -139,6 +142,15 @@ Requires: %{name}-server = %{version}-%{release} %{name}-devel = %{version}-%{re
 The postgresql-test package contains files needed for various tests for the
 PostgreSQL database management system, including regression tests and benchmarks.
 
+%package test-rpm-macros
+Summary:        Convenience RPM macros for build-time testing against PostgreSQL server
+Requires:       %{name}-server = %{version}-%{release}
+
+%description test-rpm-macros
+This package is meant to be added as BuildRequires: dependency of other packages
+that want to run build-time testsuite against running PostgreSQL server.
+
+
 %prep
 (
   cd "$(dirname "%{SOURCE0}")"
@@ -257,6 +269,9 @@ install -D %{SOURCE7} $RPM_BUILD_ROOT%{_libexecdir}/postgresql-check-db-dir
 install %{SOURCE8} $RPM_BUILD_ROOT%{_bindir}/postgresql-setup
 install -Dm 0644 %{SOURCE9} $RPM_BUILD_ROOT%{_unitdir}/postgresql.service
 install -D %{SOURCE10} $RPM_BUILD_ROOT%{_datadir}/postgresql-setup/library.sh
+install -Dm 0644 %{SOURCE11} $RPM_BUILD_ROOT%{macrosdir}/macros.postgresql
+install -m 0644 %{SOURCE12} $RPM_BUILD_ROOT%{macrosdir}/macros.postgresql-test
+install %{SOURCE13} $RPM_BUILD_ROOT%{_datadir}/postgresql-setup/postgresql_pkg_tests.sh
 
 install -d $RPM_BUILD_ROOT%{_libdir}/pgsql/test
 cp -a src/test/regress $RPM_BUILD_ROOT%{_libdir}/pgsql/test
@@ -385,11 +400,15 @@ find_lang_bins pltcl.lst pltcl
 %{_bindir}/{ecpg,pg_config}
 %{_libdir}/{pgsql/pgxs/,pkgconfig/*.pc}
 %{_libdir}/{libecpg,libecpg_compat,libpgtypes,libpq}.so
+%{macrosdir}/macros.postgresql
 
 %files static
 %{_libdir}/libpgcommon.a
 %{_libdir}/libpgport.a
 
+%files test-rpm-macros
+%{_datadir}/postgresql-setup/postgresql_pkg_tests.sh
+%{macrosdir}/macros.postgresql-test
 
 %files plperl -f plperl.lst
 %{_datadir}/pgsql/extension/plperl*
@@ -409,6 +428,10 @@ find_lang_bins pltcl.lst pltcl
 %attr(-,postgres,postgres) %{_libdir}/pgsql/test
 
 %changelog
+* Tue Apr 08 2020 daiqianwen <daiqianwen@huawei.com> - 10.5-14
+- Type: enhancement
+- DESC: add postgresql-test-rpm-macros
+
 * Tue Apr 07 2020 daiqianwen <daiqianwen@huawei.com> - 10.5-13
 - Type: enhancement
 - DESC: delete unseless tarball
