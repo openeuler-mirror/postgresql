@@ -1,0 +1,18 @@
+# Initialize the PostgreSQL tests environment.  This is supposed to be invoked
+# in prep/build/install (where you plan to run the testsuite), while it defines
+# several useful shell variables and provies useful commands.  Effect of this
+# command end with shell exit.
+%postgresql_tests_init . "/usr/share/postgresql-setup/postgresql_pkg_tests.sh"
+
+# Start the testing postgresql server, setting the actual unix user to be the
+# PostgreSQL admin.  The $PGHOST/$PGPORT are set appropriately, so psql is able
+# to run without passwords.  This also sets shell exit trap callback so that if
+# something goes wrong and package build fails, the temporary database is
+# automatically cleaned up.
+%postgresql_tests_start pgtests_start
+
+# Initialize database and run server in one step, if this works well-enough.
+%postgresql_tests_run %postgresql_tests_init ; %postgresql_tests_start
+
+%pgtests_init echo 2>&1 WARN: macro pgtests_init will be removed, use postgresql_tests_init ; %postgresql_tests_init
+%pgtests_start echo 2>&1 WARN: macro pgtests_start will be removed, use postgresql_tests_start ; %postgresql_tests_start
