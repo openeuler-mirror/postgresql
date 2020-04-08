@@ -4,17 +4,21 @@
 
 Name:          postgresql
 Version:       10.5
-Release:       12
+Release:       13
 Summary:       PostgreSQL client programs
 License:       PostgreSQL
 URL:           http://www.postgresql.org/
 Source0:       https://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2
-Source1:       https://ftp.postgresql.org/pub/source/v9.6.10/postgresql-9.6.10.tar.bz2
-Source2:       https://github.com/devexp-db/postgresql-setup/releases/download/v8.2/postgresql-setup-8.2.tar.gz
 Source3:       https://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2.sha256
-Source4:       https://ftp.postgresql.org/pub/source/v9.6.10/postgresql-9.6.10.tar.bz2.sha256
 Source5:       postgresql.tmpfiles.d
 Source6:       postgresql-bashprofile
+# https://github.com/devexp-db/postgresql-setup/blob/master/postgresql-check-db-dir.in
+Source7:       postgresql-check-db-dir
+# https://github.com/devexp-db/postgresql-setup/blob/master/bin/postgresql-setup.in
+Source8:       postgresql-setup
+Source9:       postgresql.service
+# https://github.com/devexp-db/postgresql-setup/blob/master/share/postgresql-setup/library.sh.in
+Source10:      library.sh
 
 Patch0000:     0000-postgresql-var-run-socket.patch
 Patch0001:     0000-rpm-pgsql.patch
@@ -85,14 +89,6 @@ Requires:       %{name}-libs = %{version}-%{release} %{name}-server = %{version}
 Provides:       libpq-devel = %{version}-%{release} libecpg-devel = %{version}-%{release}
 Provides:       postgresql-server-devel = %{version}-%{release}
 
-%package test-rpm-macros
-Summary:        Convenience RPM macros for build-time testing against PostgreSQL server
-Requires:       %{name}-server = %{version}-%{release}
-
-%description test-rpm-macros
-This package is meant to be added as BuildRequires: dependency of other packages
-that want to run build-time testsuite against running PostgreSQL server.
-
 
 %package static
 Summary:        Statically linked PostgreSQL libraries
@@ -105,23 +101,6 @@ counterparts.
 %description devel
 This package provides Libraries and header files for postgresql.
 
-%package upgrade
-Summary:       Support needed for upgrading a PostgreSQL database
-Requires:      %{name}-server = %{version}-%{release} %{name}-libs = %{version}-%{release}
-Provides:      bundled(postgresql-libs) = 9.6.10
-
-%description upgrade
-This package provides the pg_upgrade utility and supporting files needed
-for upgrading a PostgreSQL database from the previous major version of
-PostgreSQL.
-
-%package upgrade-devel
-Summary:       Support for build of extensions required for upgrade process
-Requires:      %{name}-upgrade = %{version}-%{release}
-
-%description upgrade-devel
-This package provides the development files needed to compile C or C++
-applications which are necessary in upgrade process.
 
 %package plperl
 Summary:       The Perl procedural language for PostgreSQL
@@ -164,9 +143,8 @@ PostgreSQL database management system, including regression tests and benchmarks
 (
   cd "$(dirname "%{SOURCE0}")"
   sha256sum -c %{SOURCE3}
-  sha256sum -c %{SOURCE4}
 )
-%setup -q -a 2
+%setup -q
 %patch0000 -p1
 %patch0001 -p1
 %patch6000 -p1
@@ -175,9 +153,6 @@ PostgreSQL database management system, including regression tests and benchmarks
 %patch6003 -p1
 %patch6004 -p1
 
-tar xfj %{SOURCE1}
-find . -type f -name .gitignore | xargs rm
-
 %build
 if [ x"`id -u`" = x0 ]; then
         echo "postgresql's regression tests fail if run as root."
@@ -185,14 +160,6 @@ if [ x"`id -u`" = x0 ]; then
         echo "--define='runselftest 0' to skip the regression tests."
         exit 1
 fi
-
-pushd postgresql-setup-8.2
-
-%configure pgdocdir=%{_pkgdocdir} PGVERSION=%{version} pgsetup_cv_os_family=redhat \
-    PGMAJORVERSION=10  NAME_DEFAULT_PREV_SERVICE=postgresql
-
-%make_build
-popd
 
 CFLAGS="${CFLAGS:-%optflags}"
 CFLAGS=`echo $CFLAGS|xargs -n 1|grep -v ffast-math|xargs -n 100`
@@ -259,46 +226,8 @@ run_testsuite "contrib"
 test "$test_failure" -eq 0
 make all -C src/test/regress
 
-pushd postgresql-9.6.10
-
-upgrade_configure ()
-{
-        PYTHON="${PYTHON-/usr/bin/python3}" \
-        CFLAGS="$CFLAGS -fno-aggressive-loop-optimizations" ./configure \
-                --build=%{_build} --host=%{_host} --prefix=%{_libdir}/pgsql/postgresql-9.6 \
-                --disable-rpath --with-perl --with-tcl --with-tclconfig=%_libdir \
-                --with-system-tzdata=/usr/share/zoneinfo "$@"
-}
-
-export PYTHON=/usr/bin/python3
-upgrade_configure --with-python
-%make_build -C src/pl/plpython all
-cp src/pl/plpython/plpython3.so ./
-unset PYTHON
-make distclean
-
-upgrade_configure --with-python
-%make_build all
-%make_build -C contrib all
-popd
-
 
 %install
-pushd postgresql-setup-8.2
-%make_install
-popd
-
-mv $RPM_BUILD_ROOT/%{_pkgdocdir}/README.rpm-dist ./
-
-cat > $RPM_BUILD_ROOT%{_sysconfdir}/postgresql-setup/upgrade/postgresql.conf <<EOF
-id              postgresql
-major           9.6
-data_default    %{_localstatedir}/pgsql/data
-package         postgresql-upgrade
-engine          %{_libdir}/pgsql/postgresql-9.6/bin
-description     "Upgrade data from system PostgreSQL version (PostgreSQL 9.6)"
-redhat_sockets_hack no
-EOF
 
 make DESTDIR=$RPM_BUILD_ROOT install-world
 
@@ -324,26 +253,10 @@ install -d -m 700 $RPM_BUILD_ROOT%{?_localstatedir}/lib/pgsql/data
 install -d -m 700 $RPM_BUILD_ROOT%{?_localstatedir}/lib/pgsql/backups
 install -m 0644 %{SOURCE6} $RPM_BUILD_ROOT%{?_localstatedir}/lib/pgsql/.bash_profile
 
-pushd postgresql-9.6.10
-%make_install
-%make_install -C contrib
-install -m 755 plpython3.so $RPM_BUILD_ROOT/%_libdir/pgsql/postgresql-9.6/lib
-popd
-
-pushd $RPM_BUILD_ROOT%{_libdir}/pgsql/postgresql-9.6
-rm bin/{clusterdb,createdb,createlang,createuser,dropdb,droplang,dropuser,ecpg}
-rm bin/{initdb,pg_basebackup,pg_dump,pg_dumpall,pg_restore,pgbench,psql,reindexdb,vacuumdb}
-rm -rf share/{doc,man,tsearch_data}
-rm lib/*.a
-rm lib/libpq.so*
-rm lib/lib{ecpg,ecpg_compat,pgtypes}.so*
-rm share/{*.bki,*description,*.sample,*.sql,*.txt}
-rm share/extension/{*.sql,*.control}
-popd
-cat <<EOF > $RPM_BUILD_ROOT%macrosdir/macros.%name-upgrade
-%%postgresql_upgrade_prefix %{_libdir}/pgsql/postgresql-9.6
-EOF
-
+install -D %{SOURCE7} $RPM_BUILD_ROOT%{_libexecdir}/postgresql-check-db-dir
+install %{SOURCE8} $RPM_BUILD_ROOT%{_bindir}/postgresql-setup
+install -Dm 0644 %{SOURCE9} $RPM_BUILD_ROOT%{_unitdir}/postgresql.service
+install -D %{SOURCE10} $RPM_BUILD_ROOT%{_datadir}/postgresql-setup/library.sh
 
 install -d $RPM_BUILD_ROOT%{_libdir}/pgsql/test
 cp -a src/test/regress $RPM_BUILD_ROOT%{_libdir}/pgsql/test
@@ -397,9 +310,6 @@ find_lang_bins pltcl.lst pltcl
 %systemd_postun_with_restart postgresql.service
 
 
-%check
-make -C postgresql-setup-8.2 check
-
 
 %clean
 
@@ -423,7 +333,7 @@ make -C postgresql-setup-8.2 check
 
 %files help
 %doc doc/html doc/KNOWN_BUGS doc/MISSING_FEATURES doc/TODO
-%doc HISTORY doc/bug.template README.rpm-dist
+%doc HISTORY doc/bug.template
 %{_libdir}/pgsql/tutorial/
 %{_mandir}/man1/*
 %{_mandir}/man3/*
@@ -459,20 +369,15 @@ make -C postgresql-setup-8.2 check
 %{_datadir}/postgresql-setup/library.sh
 %{_tmpfilesdir}/postgresql.conf
 %{_libdir}/pgsql/{*_and_*,dict_snowball,euc2004_sjis2004,libpqwalreceiver,pg_prewarm,pgoutput,plpgsql}.so
-%{_libexecdir}/initscripts/legacy-actions/postgresql/*
 %{_libexecdir}/postgresql-check-db-dir
-%{_sbindir}/postgresql-new-systemd-unit
 %{_unitdir}/*postgresql*.service
 %dir %{_datadir}/pgsql/{extension,contrib}
 %dir %{_datadir}/postgresql-setup
-%dir %{_libexecdir}/initscripts/legacy-actions/postgresql
-%dir %{_sysconfdir}/postgresql-setup/upgrade
 %attr(700,postgres,postgres) %dir %{?_localstatedir}/lib/pgsql
 %attr(700,postgres,postgres) %dir %{?_localstatedir}/lib/pgsql/backups
 %attr(700,postgres,postgres) %dir %{?_localstatedir}/lib/pgsql/data
 %attr(755,postgres,postgres) %dir %{?_localstatedir}/run/postgresql
 %attr(700,postgres,postgres) %config(noreplace) %{?_localstatedir}/lib/pgsql/.bash_profile
-%config %{_sysconfdir}/postgresql-setup/upgrade/*.conf
 
 
 %files devel -f devel.lst
@@ -480,27 +385,10 @@ make -C postgresql-setup-8.2 check
 %{_bindir}/{ecpg,pg_config}
 %{_libdir}/{pgsql/pgxs/,pkgconfig/*.pc}
 %{_libdir}/{libecpg,libecpg_compat,libpgtypes,libpq}.so
-%{macrosdir}/macros.%name
 
 %files static
 %{_libdir}/libpgcommon.a
 %{_libdir}/libpgport.a
-
-%files test-rpm-macros
-%{_datadir}/postgresql-setup/postgresql_pkg_tests.sh
-%{macrosdir}/macros.%name-test
-
-
-%files upgrade
-%{_libdir}/pgsql/postgresql-9.6/{bin,lib,share}
-%exclude %{_libdir}/pgsql/postgresql-9.6/bin/pg_config
-%exclude %{_libdir}/pgsql/postgresql-9.6/lib/{pgxs,pkgconfig}
-
-
-%files upgrade-devel
-%{_libdir}/pgsql/postgresql-9.6/{include,bin/pg_config}
-%{_libdir}/pgsql/postgresql-9.6/lib/{pkgconfig,pgxs}
-%{macrosdir}/macros.%name-upgrade
 
 
 %files plperl -f plperl.lst
@@ -521,11 +409,15 @@ make -C postgresql-setup-8.2 check
 %attr(-,postgres,postgres) %{_libdir}/pgsql/test
 
 %changelog
-* Tue Mar 10 2020 steven <steven_ygui@163.com> 10.5-12
+* Tue Apr 07 2020 daiqianwen <daiqianwen@huawei.com> - 10.5-13
+- Type: enhancement
+- DESC: delete unseless tarball
+
+* Tue Mar 10 2020 steven <steven_ygui@163.com> - 10.5-12
 - Type: enhancement
 - DESC: remove python2
 
-* Mon Mar 10 2020 yanzhihua <yanzhihua4@huawei.com> 10.5-11
+* Mon Mar 10 2020 yanzhihua <yanzhihua4@huawei.com> - 10.5-11
 - Type: bug fix
 - ID: #I1AHMH
 - SUG: NA
