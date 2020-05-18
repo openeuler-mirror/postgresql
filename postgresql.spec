@@ -4,7 +4,7 @@
 
 Name:          postgresql
 Version:       10.5
-Release:       14
+Release:       15
 Summary:       PostgreSQL client programs
 License:       PostgreSQL
 URL:           http://www.postgresql.org/
@@ -31,6 +31,7 @@ Patch6001:     6001-CVE-2019-10164-2.patch
 Patch6002:     CVE-2019-10208.patch
 Patch6003:     CVE-2018-16850.patch
 Patch6004:     CVE-2019-10130.patch
+Patch6005:     CVE-2020-1720.patch
 
 BuildRequires: gcc perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk perl(ExtUtils::Embed)
 BuildRequires: perl-devel perl-generators readline-devel zlib-devel systemd systemd-devel
@@ -164,6 +165,7 @@ that want to run build-time testsuite against running PostgreSQL server.
 %patch6002 -p1
 %patch6003 -p1
 %patch6004 -p1
+%patch6005 -p1
 
 %build
 if [ x"`id -u`" = x0 ]; then
@@ -428,6 +430,12 @@ find_lang_bins pltcl.lst pltcl
 %attr(-,postgres,postgres) %{_libdir}/pgsql/test
 
 %changelog
+* Wed May 6 2020 cuibaobao <cuibaobao1@huawei.com> - 10.5-15
+- Type:cve
+- ID:CVE-2020-1720
+- SUG: NA
+- DESC: fix CVE-2020-1720
+
 * Tue Apr 08 2020 daiqianwen <daiqianwen@huawei.com> - 10.5-14
 - Type: enhancement
 - DESC: add postgresql-test-rpm-macros
