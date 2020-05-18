@@ -4,7 +4,7 @@
 
 Name:          postgresql
 Version:       10.5
-Release:       15
+Release:       16
 Summary:       PostgreSQL client programs
 License:       PostgreSQL
 URL:           http://www.postgresql.org/
@@ -430,6 +430,9 @@ find_lang_bins pltcl.lst pltcl
 %attr(-,postgres,postgres) %{_libdir}/pgsql/test
 
 %changelog
+* Mon May 18 2020 wangchen <wangchen137@huawei.com> - 10.5-16
+- rebuild for postgresql
+
 * Wed May 6 2020 cuibaobao <cuibaobao1@huawei.com> - 10.5-15
 - Type:cve
 - ID:CVE-2020-1720
