@@ -635,11 +635,6 @@ while true; do
             shift 2
             ;;
 
-        --upgrade-ids)
-            parse_upgrade_setup help
-            exit 0
-            ;;
-
         --version)
             print_version
             exit 0
@@ -661,13 +656,6 @@ test $parse_fail -ne 0 && die "can't parse arguments"
 
 test "$option_mode" = none \
     && die "no mode specified, use --initdb or --upgrade, or --help"
-
-if ! parse_upgrade_setup config "$option_upgradefrom"; then
-    if test upgrade = "$option_mode"; then
-        die $"bad --upgrade-from parameter '$option_upgradefrom'," \
-            $"try --upgrade-ids"
-    fi
-fi
 
 ## GATHER THE SETUP FIRST ##
 
