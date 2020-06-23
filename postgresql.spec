@@ -4,7 +4,7 @@
 
 Name:          postgresql
 Version:       10.5
-Release:       15
+Release:       16
 Summary:       PostgreSQL client programs
 License:       PostgreSQL
 URL:           http://www.postgresql.org/
@@ -430,6 +430,10 @@ find_lang_bins pltcl.lst pltcl
 %attr(-,postgres,postgres) %{_libdir}/pgsql/test
 
 %changelog
+* Fri Jun 19 2020 cuibaobao <cuibaobao1@huawei.com> - 10.5-16
+- Type: enhancement
+- DESC: delete all about residual parse_upgrade_setup in postgresql-setup
+
 * Wed May 6 2020 cuibaobao <cuibaobao1@huawei.com> - 10.5-15
 - Type:cve
 - ID:CVE-2020-1720
