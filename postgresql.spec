@@ -430,8 +430,9 @@ find_lang_bins pltcl.lst pltcl
 %attr(-,postgres,postgres) %{_libdir}/pgsql/test
 
 %changelog
-* Mon May 18 2020 wangchen <wangchen137@huawei.com> - 10.5-16
-- rebuild for postgresql
+* Fri Jun 19 2020 cuibaobao <cuibaobao1@huawei.com> - 10.5-16
+- Type: enhancement
+- DESC: delete all about residual parse_upgrade_setup in postgresql-setup
 
 * Wed May 6 2020 cuibaobao <cuibaobao1@huawei.com> - 10.5-15
 - Type:cve
