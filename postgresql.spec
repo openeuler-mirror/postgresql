@@ -4,7 +4,7 @@
 
 Name:          postgresql
 Version:       10.5
-Release:       16
+Release:       17
 Summary:       PostgreSQL client programs
 License:       PostgreSQL
 URL:           http://www.postgresql.org/
