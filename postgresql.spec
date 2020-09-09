@@ -23,15 +23,17 @@ Source11:      macros.postgresql
 Source12:      macros.postgresql-test
 Source13:      postgresql_pkg_tests.sh
 
-Patch0000:     0000-postgresql-var-run-socket.patch
-Patch0001:     0000-rpm-pgsql.patch
-
-Patch6000:     6000-CVE-2019-10164-1.patch
-Patch6001:     6001-CVE-2019-10164-2.patch
-Patch6002:     CVE-2019-10208.patch
-Patch6003:     CVE-2018-16850.patch
-Patch6004:     CVE-2019-10130.patch
-Patch6005:     CVE-2020-1720.patch
+Patch1:     0001-postgresql-var-run-socket.patch
+Patch2:     0002-rpm-pgsql.patch
+Patch3:     0003-CVE-2019-10164-1.patch
+Patch4:     0004-CVE-2019-10164-2.patch
+Patch5:     0005-CVE-2019-10208.patch
+Patch6:     0006-CVE-2018-16850.patch
+Patch7:     0007-CVE-2019-10130.patch
+Patch8:     0008-CVE-2020-1720.patch
+Patch9:     0009-CVE-2020-14349-1.patch
+Patch10:    0010-CVE-2020-14349-2.patch
+Patch11:    0011-CVE-2020-14350.patch
 
 BuildRequires: gcc perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk perl(ExtUtils::Embed)
 BuildRequires: perl-devel perl-generators readline-devel zlib-devel systemd systemd-devel
