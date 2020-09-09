@@ -160,14 +160,17 @@ that want to run build-time testsuite against running PostgreSQL server.
   sha256sum -c %{SOURCE3}
 )
 %setup -q
-%patch0000 -p1
-%patch0001 -p1
-%patch6000 -p1
-%patch6001 -p1
-%patch6002 -p1
-%patch6003 -p1
-%patch6004 -p1
-%patch6005 -p1
+%patch1 -p1
+%patch2 -p1
+%patch3 -p1
+%patch4 -p1
+%patch5 -p1
+%patch6 -p1
+%patch7 -p1
+%patch8 -p1
+%patch9 -p1
+%patch10 -p1
+%patch11 -p1
 
 %build
 if [ x"`id -u`" = x0 ]; then
@@ -432,6 +435,9 @@ find_lang_bins pltcl.lst pltcl
 %attr(-,postgres,postgres) %{_libdir}/pgsql/test
 
 %changelog
+* Web Sep 9 2020 yanglongkang<yanglongkang@huawei.com> - 10.5-17
+- Fix CVE-2020-14349 CVE-2020-14350
+
 * Fri Jun 19 2020 cuibaobao <cuibaobao1@huawei.com> - 10.5-16
 - Type: enhancement
 - DESC: delete all about residual parse_upgrade_setup in postgresql-setup
