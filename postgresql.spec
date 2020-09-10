@@ -435,7 +435,7 @@ find_lang_bins pltcl.lst pltcl
 %attr(-,postgres,postgres) %{_libdir}/pgsql/test
 
 %changelog
-* Web Sep 9 2020 yanglongkang<yanglongkang@huawei.com> - 10.5-18
+* Web Sep 9 2020 yanglongkang<yanglongkang@huawei.com> - 10.5-17
 - Fix CVE-2020-14349 CVE-2020-14350
 
 * Fri Jun 19 2020 cuibaobao <cuibaobao1@huawei.com> - 10.5-16
