@@ -4,7 +4,7 @@
 
 Name:          postgresql
 Version:       10.5
-Release:       17
+Release:       18
 Summary:       PostgreSQL client programs
 License:       PostgreSQL
 URL:           http://www.postgresql.org/
@@ -37,7 +37,7 @@ Patch11:    0011-CVE-2020-14350.patch
 
 BuildRequires: gcc perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk perl(ExtUtils::Embed)
 BuildRequires: perl-devel perl-generators readline-devel zlib-devel systemd systemd-devel
-BuildRequires: util-linux m4 elinks docbook-utils help2man
+BuildRequires: util-linux m4 elinks docbook-utils help2man docbook-style-xsl
 BuildRequires: python3 python3-devel tcl-devel openssl-devel krb5-devel openldap-devel gettext >= 0.10.35
 BuildRequires: uuid-devel libxml2-devel libxslt-devel pam-devel systemtap-sdt-devel libselinux-devel
 Requires:      %{name}-libs = %{version}-%{release}
@@ -435,8 +435,11 @@ find_lang_bins pltcl.lst pltcl
 %attr(-,postgres,postgres) %{_libdir}/pgsql/test
 
 %changelog
-* Web Sep 9 2020 yanglongkang<yanglongkang@huawei.com> - 10.5-17
+* Web Sep 9 2020 yanglongkang<yanglongkang@huawei.com> - 10.5-18
 - Fix CVE-2020-14349 CVE-2020-14350
+
+* Tue Aug 18 2020 yanglongkang<yanglongkang@huawei.com> - 10.5-17
+- add release for update
 
 * Fri Jun 19 2020 cuibaobao <cuibaobao1@huawei.com> - 10.5-16
 - Type: enhancement
