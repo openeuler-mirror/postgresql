@@ -4,7 +4,7 @@
 
 Name:          postgresql
 Version:       10.5
-Release:       17
+Release:       18
 Summary:       PostgreSQL client programs
 License:       PostgreSQL
 URL:           http://www.postgresql.org/
@@ -39,7 +39,7 @@ BuildRequires: util-linux m4 elinks docbook-utils help2man
 BuildRequires: python3 python3-devel tcl-devel openssl-devel krb5-devel openldap-devel gettext >= 0.10.35
 BuildRequires: uuid-devel libxml2-devel libxslt-devel pam-devel systemtap-sdt-devel libselinux-devel
 Requires:      %{name}-libs = %{version}-%{release}
-
+Recommends:    %{name}-help = %{version}-%{release}
 %package libs
 Summary: The shared libraries required for any PostgreSQL clients
 Requires(post): glibc
@@ -430,6 +430,12 @@ find_lang_bins pltcl.lst pltcl
 %attr(-,postgres,postgres) %{_libdir}/pgsql/test
 
 %changelog
+* Fri Nov 06 2020 caodongxia <caodongxia@huawei.com> - 10.5-18
+- Add install requires help package into main package
+
+* Tue Aug 18 2020 fanjiachen <fanjiachen3@huawei.com> - 10.5-17
+- Add release for update
+
 * Fri Jun 19 2020 cuibaobao <cuibaobao1@huawei.com> - 10.5-16
 - Type: enhancement
 - DESC: delete all about residual parse_upgrade_setup in postgresql-setup
