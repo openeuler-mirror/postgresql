@@ -1,0 +1,76 @@
+From a1413123f80f470da1ec422592f228aebe4a8866 Mon Sep 17 00:00:00 2001
+From: Michael Paquier <michael@paquier.xyz>
+Date: Thu, 27 Feb 2020 11:21:14 +0900
+Subject: [PATCH 1/2] createdb: Fix quoting of --encoding, --lc-ctype and
+ --lc-collate
+
+The original coding failed to properly quote those arguments, leading to
+failures when using quotes in the values used.  As the quoting can be
+encoding-sensitive, the connection to the backend needs to be taken
+before applying the correct quoting.
+
+Author: Michael Paquier
+Reviewed-by: Daniel Gustafsson
+Discussion: https://postgr.es/m/20200214041004.GB1998@paquier.xyz
+Backpatch-through: 9.5
+---
+ src/bin/scripts/createdb.c | 29 +++++++++++++++++++----------
+ 1 file changed, 19 insertions(+), 10 deletions(-)
+
+diff --git a/src/bin/scripts/createdb.c b/src/bin/scripts/createdb.c
+index 8116b084ff..45d26ecb8c 100644
+--- a/src/bin/scripts/createdb.c
++++ b/src/bin/scripts/createdb.c
+@@ -177,6 +177,13 @@ main(int argc, char *argv[])
+ 			dbname = get_user_name_or_exit(progname);
+ 	}
+ 
++	/* No point in trying to use postgres db when creating postgres db. */
++	if (maintenance_db == NULL && strcmp(dbname, "postgres") == 0)
++		maintenance_db = "template1";
++
++	conn = connectMaintenanceDatabase(maintenance_db, host, port, username,
++									  prompt_password, progname, echo);
++
+ 	initPQExpBuffer(&sql);
+ 
+ 	appendPQExpBuffer(&sql, "CREATE DATABASE %s",
+@@ -187,23 +194,25 @@ main(int argc, char *argv[])
+ 	if (tablespace)
+ 		appendPQExpBuffer(&sql, " TABLESPACE %s", fmtId(tablespace));
+ 	if (encoding)
+-		appendPQExpBuffer(&sql, " ENCODING '%s'", encoding);
++	{
++		appendPQExpBufferStr(&sql, " ENCODING ");
++		appendStringLiteralConn(&sql, encoding, conn);
++	}
+ 	if (template)
+ 		appendPQExpBuffer(&sql, " TEMPLATE %s", fmtId(template));
+ 	if (lc_collate)
+-		appendPQExpBuffer(&sql, " LC_COLLATE '%s'", lc_collate);
++	{
++		appendPQExpBufferStr(&sql, " LC_COLLATE ");
++		appendStringLiteralConn(&sql, lc_collate, conn);
++	}
+ 	if (lc_ctype)
+-		appendPQExpBuffer(&sql, " LC_CTYPE '%s'", lc_ctype);
++	{
++		appendPQExpBufferStr(&sql, " LC_CTYPE ");
++		appendStringLiteralConn(&sql, lc_ctype, conn);
++	}
+ 
+ 	appendPQExpBufferChar(&sql, ';');
+ 
+-	/* No point in trying to use postgres db when creating postgres db. */
+-	if (maintenance_db == NULL && strcmp(dbname, "postgres") == 0)
+-		maintenance_db = "template1";
+-
+-	conn = connectMaintenanceDatabase(maintenance_db, host, port, username,
+-									  prompt_password, progname, echo);
+-
+ 	if (echo)
+ 		printf("%s\n", sql.data);
+ 	result = PQexec(conn, sql.data);
+-- 
+2.23.0
+
