@@ -4,7 +4,7 @@
 
 Name:          postgresql
 Version:       10.5
-Release:       18
+Release:       19
 Summary:       PostgreSQL client programs
 License:       PostgreSQL
 URL:           http://www.postgresql.org/
@@ -25,6 +25,9 @@ Source13:      postgresql_pkg_tests.sh
 
 Patch0000:     0000-postgresql-var-run-socket.patch
 Patch0001:     0000-rpm-pgsql.patch
+Patch0002:    createdb-Fix-quoting-of-encoding-lc-ctype-and-lc-col.patch
+Patch0003:    Remove-some-code-related-to-7.3-and-older-servers-fr.patch
+Patch0004:    Fix-error-handling-of-vacuumdb-when-running-out-of-f.patch
 
 Patch6000:     6000-CVE-2019-10164-1.patch
 Patch6001:     6001-CVE-2019-10164-2.patch
@@ -32,6 +35,16 @@ Patch6002:     CVE-2019-10208.patch
 Patch6003:     CVE-2018-16850.patch
 Patch6004:     CVE-2019-10130.patch
 Patch6005:     CVE-2020-1720.patch
+
+Patch6006:     0009-CVE-2020-14349-1.patch
+Patch6007:     0010-CVE-2020-14349-2.patch
+Patch6008:     0011-CVE-2020-14350.patch
+Patch6009:     CVE-2020-25694-1.patch
+Patch6010:     CVE-2020-25694-2.patch
+Patch6011:     CVE-2020-25694-3.patch
+Patch6012:     CVE-2020-25695.patch
+Patch6013:     CVE-2020-25696.patch
+
 
 BuildRequires: gcc perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk perl(ExtUtils::Embed)
 BuildRequires: perl-devel perl-generators readline-devel zlib-devel systemd systemd-devel
@@ -157,15 +170,7 @@ that want to run build-time testsuite against running PostgreSQL server.
   cd "$(dirname "%{SOURCE0}")"
   sha256sum -c %{SOURCE3}
 )
-%setup -q
-%patch0000 -p1
-%patch0001 -p1
-%patch6000 -p1
-%patch6001 -p1
-%patch6002 -p1
-%patch6003 -p1
-%patch6004 -p1
-%patch6005 -p1
+%autosetup -n %{name}-%{version} -p1
 
 %build
 if [ x"`id -u`" = x0 ]; then
@@ -430,6 +435,10 @@ find_lang_bins pltcl.lst pltcl
 %attr(-,postgres,postgres) %{_libdir}/pgsql/test
 
 %changelog
+* Thu Nov 10 2020 Ronnie_Jiang <zhenhua.jiang@huawei.com> - 10.5-19
+- Fix CVE-2020-25694 CVE-2020-25695 CVE-2020-25696
+
+
 * Fri Nov 06 2020 caodongxia <caodongxia@huawei.com> - 10.5-18
 - Add install requires help package into main package
 
