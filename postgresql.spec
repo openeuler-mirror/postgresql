@@ -435,7 +435,7 @@ find_lang_bins pltcl.lst pltcl
 %attr(-,postgres,postgres) %{_libdir}/pgsql/test
 
 %changelog
-* Thu Nov 10 2020 Ronnie_Jiang <zhenhua.jiang@huawei.com> - 10.5-19
+* Thu Dec 10 2020 Ronnie_Jiang <zhenhua.jiang@huawei.com> - 10.5-19
 - Fix CVE-2020-25694 CVE-2020-25695 CVE-2020-25696
 
 
@@ -455,7 +455,7 @@ find_lang_bins pltcl.lst pltcl
 - SUG: NA
 - DESC: fix CVE-2020-1720
 
-* Tue Apr 08 2020 daiqianwen <daiqianwen@huawei.com> - 10.5-14
+* Tue Sep 08 2020 daiqianwen <daiqianwen@huawei.com> - 10.5-14
 - Type: enhancement
 - DESC: add postgresql-test-rpm-macros
 
@@ -467,7 +467,7 @@ find_lang_bins pltcl.lst pltcl
 - Type: enhancement
 - DESC: remove python2
 
-* Mon Mar 10 2020 yanzhihua <yanzhihua4@huawei.com> - 10.5-11
+* Tue Mar 10 2020 yanzhihua <yanzhihua4@huawei.com> - 10.5-11
 - Type: bug fix
 - ID: #I1AHMH
 - SUG: NA
