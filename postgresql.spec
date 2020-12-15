@@ -4,7 +4,7 @@
 
 Name:          postgresql
 Version:       10.5
-Release:       18
+Release:       19
 Summary:       PostgreSQL client programs
 License:       PostgreSQL
 URL:           http://www.postgresql.org/
@@ -32,6 +32,17 @@ Patch6002:     CVE-2019-10208.patch
 Patch6003:     CVE-2018-16850.patch
 Patch6004:     CVE-2019-10130.patch
 Patch6005:     CVE-2020-1720.patch
+Patch6006:     CVE-2020-14349-1.patch
+Patch6007:     CVE-2020-14349-2.patch
+Patch6008:     CVE-2020-14350.patch
+Patch6009:     createdb-Fix-quoting-of-encoding-lc-ctype-and-lc-col.patch
+Patch6010:     Remove-some-code-related-to-7.3-and-older-servers-fr.patch
+Patch6011:     Fix-error-handling-of-vacuumdb-when-running-out-of-f.patch
+Patch6012:     CVE-2020-25694-1.patch
+Patch6013:     CVE-2020-25694-2.patch
+Patch6014:     CVE-2020-25694-3.patch
+Patch6015:     CVE-2020-25695.patch
+Patch6016:     CVE-2020-25696.patch
 
 BuildRequires: gcc perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk perl(ExtUtils::Embed)
 BuildRequires: perl-devel perl-generators readline-devel zlib-devel systemd systemd-devel
@@ -157,15 +168,7 @@ that want to run build-time testsuite against running PostgreSQL server.
   cd "$(dirname "%{SOURCE0}")"
   sha256sum -c %{SOURCE3}
 )
-%setup -q
-%patch0000 -p1
-%patch0001 -p1
-%patch6000 -p1
-%patch6001 -p1
-%patch6002 -p1
-%patch6003 -p1
-%patch6004 -p1
-%patch6005 -p1
+%autosetup -n %{name}-%{version} -p1
 
 %build
 if [ x"`id -u`" = x0 ]; then
@@ -430,6 +433,9 @@ find_lang_bins pltcl.lst pltcl
 %attr(-,postgres,postgres) %{_libdir}/pgsql/test
 
 %changelog
+* Tue Dec 15 2020 wangxiao <wangxiao65@huawei.com> - 10.5-19
+- Fix CVE-2020-14349 CVE-2020-14350 CVE-2020-25694 CVE-2020-25695 CVE-2020-25696
+
 * Fri Nov 06 2020 caodongxia <caodongxia@huawei.com> - 10.5-18
 - Add install requires help package into main package
 
