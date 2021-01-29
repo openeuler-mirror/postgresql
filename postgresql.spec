@@ -4,7 +4,7 @@
 
 Name:          postgresql
 Version:       10.5
-Release:       19
+Release:       20
 Summary:       PostgreSQL client programs
 License:       PostgreSQL
 URL:           http://www.postgresql.org/
@@ -48,7 +48,7 @@ Patch6013:     CVE-2020-25696.patch
 
 BuildRequires: gcc perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk perl(ExtUtils::Embed)
 BuildRequires: perl-devel perl-generators readline-devel zlib-devel systemd systemd-devel
-BuildRequires: util-linux m4 elinks docbook-utils help2man
+BuildRequires: util-linux m4 elinks docbook-utils help2man docbook-style-xsl
 BuildRequires: python3 python3-devel tcl-devel openssl-devel krb5-devel openldap-devel gettext >= 0.10.35
 BuildRequires: uuid-devel libxml2-devel libxslt-devel pam-devel systemtap-sdt-devel libselinux-devel
 Requires:      %{name}-libs = %{version}-%{release}
@@ -435,6 +435,9 @@ find_lang_bins pltcl.lst pltcl
 %attr(-,postgres,postgres) %{_libdir}/pgsql/test
 
 %changelog
+* Fri Jan 29 2021 lingsheng <lingsheng@huawei.com> - 10.5-20
+- Add docbook-style-xsl to BuildRequires
+
 * Thu Dec 10 2020 Ronnie_Jiang <zhenhua.jiang@huawei.com> - 10.5-19
 - Fix CVE-2020-25694 CVE-2020-25695 CVE-2020-25696
 
