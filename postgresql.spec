@@ -4,7 +4,7 @@
 
 Name:          postgresql
 Version:       10.5
-Release:       18
+Release:       19
 Summary:       PostgreSQL client programs
 License:       PostgreSQL
 URL:           http://www.postgresql.org/
@@ -42,6 +42,7 @@ Patch16:    CVE-2020-25694-2.patch
 Patch17:    CVE-2020-25694-3.patch
 Patch18:    CVE-2020-25695.patch
 Patch19:    CVE-2020-25696.patch
+Patch20:    CVE-2021-20229.patch
 
 BuildRequires: gcc perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk perl(ExtUtils::Embed)
 BuildRequires: perl-devel perl-generators readline-devel zlib-devel systemd systemd-devel
@@ -167,18 +168,7 @@ that want to run build-time testsuite against running PostgreSQL server.
   cd "$(dirname "%{SOURCE0}")"
   sha256sum -c %{SOURCE3}
 )
-%setup -q
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1
-%patch4 -p1
-%patch5 -p1
-%patch6 -p1
-%patch7 -p1
-%patch8 -p1
-%patch9 -p1
-%patch10 -p1
-%patch11 -p1
+%autosetup -n %{name}-%{version} -p1
 
 %build
 if [ x"`id -u`" = x0 ]; then
@@ -443,6 +433,9 @@ find_lang_bins pltcl.lst pltcl
 %attr(-,postgres,postgres) %{_libdir}/pgsql/test
 
 %changelog
+* Fri Feb 26 2021 wangyue <wangyue92@huawei.com> - 10.5-19
+- Fix CVE-2021-20229
+
 * Tue Dec 8 2020 wangxiao <wangxiao65@huawei.com> - 10.5-18
 - Fix CVE-2020-25694 CVE-2020-25695 CVE-2020-25696
 
