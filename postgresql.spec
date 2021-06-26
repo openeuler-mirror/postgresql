@@ -1232,3 +1232,68 @@ make -C postgresql-setup-%{setup_version} check
 %changelog
 * Thu Jun 17 2021 bzhaoop<bzhaojyathousandy@gmail.com> - 13.3-1
 - Package init for new version 13.3
+
+* Fri Feb 26 2021 wangyue <wangyue92@huawei.com> - 10.5-19
+- Fix CVE-2021-20229
+
+* Tue Dec 8 2020 wangxiao <wangxiao65@huawei.com> - 10.5-18
+- Fix CVE-2020-25694 CVE-2020-25695 CVE-2020-25696
+
+* Web Sep 9 2020 yanglongkang<yanglongkang@huawei.com> - 10.5-17
+- Fix CVE-2020-14349 CVE-2020-14350
+
+* Fri Jun 19 2020 cuibaobao <cuibaobao1@huawei.com> - 10.5-16
+- Type: enhancement
+- DESC: delete all about residual parse_upgrade_setup in postgresql-setup
+
+* Wed May 6 2020 cuibaobao <cuibaobao1@huawei.com> - 10.5-15
+- Type:cve
+- ID:CVE-2020-1720
+- SUG: NA
+- DESC: fix CVE-2020-1720
+
+* Tue Apr 08 2020 daiqianwen <daiqianwen@huawei.com> - 10.5-14
+- Type: enhancement
+- DESC: add postgresql-test-rpm-macros
+
+* Tue Apr 07 2020 daiqianwen <daiqianwen@huawei.com> - 10.5-13
+- Type: enhancement
+- DESC: delete unseless tarball
+
+* Tue Mar 10 2020 steven <steven_ygui@163.com> - 10.5-12
+- Type: enhancement
+- DESC: remove python2
+
+* Mon Mar 10 2020 yanzhihua <yanzhihua4@huawei.com> - 10.5-11
+- Type: bug fix
+- ID: #I1AHMH
+- SUG: NA
+- DESC: fix issue #I1AHMH
+
+* Mon Feb 3 2020 chenli <chenli147@huawei.com> 10.5-10
+- Type:cve
+- ID:CVE-2019-10130
+- SUG: NA
+- DESC: fix CVE-2019-10130
+
+* Tue Jan 14 2020 openEuler Buildteam <buildteam@openeuler.org> - 10.5-9
+- Type:enhancement
+- ID:NA
+- SUG:restart
+- DESC: remove useless files
+
+* Mon Jan 13 2020 yanzhihua <yanzhihua4@huawei.com> - 10.5-8
+- Type: enhancement
+- ID: NA
+- SUG: NA
+- DESC: modify buildrequire
+
+* Tue Dec 24 2019 fengbing <fengbing7@huawei.com> - 10.5-7
+- Type:cves
+- ID:CVE-2019-10208 CVE-2018-16850
+- SUG:restart
+- DESC: fix CVE-2019-10208 CVE-2018-16850
+
+* Fri Nov 15 2019 yanzhihua<yanzhihua4@huawei.com> - 10.5-6
+- Package init
+
