@@ -27,7 +27,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 13
 Version: %{majorversion}.3
-Release: 1
+Release: 2
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -665,17 +665,6 @@ make DESTDIR=$RPM_BUILD_ROOT install-world
 
 # We ship pg_config through libpq-devel
 mv $RPM_BUILD_ROOT/%_mandir/man1/pg_{,server_}config.1
-rm $RPM_BUILD_ROOT/%_includedir/pg_config*.h
-rm $RPM_BUILD_ROOT/%_includedir/libpq/libpq-fs.h
-rm $RPM_BUILD_ROOT/%_includedir/postgres_ext.h
-rm -r $RPM_BUILD_ROOT/%_includedir/pgsql/internal/
-%if ! %external_libpq
-rm $RPM_BUILD_ROOT/%_includedir/libpq-events.h
-rm $RPM_BUILD_ROOT/%_includedir/libpq-fe.h
-rm $RPM_BUILD_ROOT/%{_libdir}/pkgconfig/*.pc
-rm $RPM_BUILD_ROOT/%{_libdir}/libpq.so
-rm $RPM_BUILD_ROOT/%{_libdir}/libpq.a
-%endif
 
 %if %plpython3
         mv src/Makefile.global src/Makefile.global.save
@@ -1149,6 +1138,10 @@ make -C postgresql-setup-%{setup_version} check
 %dir %{_includedir}/pgsql
 %{_includedir}/pgsql/server
 %{_libdir}/pgsql/pgxs/
+%{_includedir}/*
+%{_libdir}/{pgsql/pgxs/,pkgconfig/*.pc}
+%{_libdir}/{libecpg,libecpg_compat,libpgtypes,libpq}.so
+%{_libdir}/libpq.a
 %{_mandir}/man1/pg_server_config.*
 %{_mandir}/man3/SPI_*
 %{macrosdir}/macros.%name
@@ -1230,6 +1223,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Mon Jun 28 2021 bzhaoop<bzhaojyathousandy@gmail.com> - 13.3-2
+- Figure out the dependency by postgresql-odbc, refactor the package to fix
+
 * Thu Jun 17 2021 bzhaoop<bzhaojyathousandy@gmail.com> - 13.3-1
 - Package init for new version 13.3
 
