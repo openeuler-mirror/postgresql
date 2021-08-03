@@ -27,7 +27,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 13
 Version: %{majorversion}.3
-Release: 2
+Release: 3
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -1140,7 +1140,7 @@ make -C postgresql-setup-%{setup_version} check
 %{_libdir}/pgsql/pgxs/
 %{_includedir}/*
 %{_libdir}/{pgsql/pgxs/,pkgconfig/*.pc}
-%{_libdir}/{libecpg,libecpg_compat,libpgtypes,libpq}.so
+%{_libdir}/{libecpg,libecpg_compat,libpgtypes,libpq}.so*
 %{_libdir}/libpq.a
 %{_mandir}/man1/pg_server_config.*
 %{_mandir}/man3/SPI_*
@@ -1223,6 +1223,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Tue Aug 3 2021 bzhaoop<bzhaojyathousandy@gmail.com> - 13.3-3
+- Add the missed libpq.so file into postgresql-server-devel package.
+
 * Mon Jun 28 2021 bzhaoop<bzhaojyathousandy@gmail.com> - 13.3-2
 - Figure out the dependency by postgresql-odbc, refactor the package to fix
 
