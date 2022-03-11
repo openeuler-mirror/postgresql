@@ -1,6 +1,11 @@
 %{!?beta:%global beta 0}
 %{!?test:%global test 1}
+%ifarch riscv64
+# Fail to pass tests on riscv64
+%{!?llvmjit:%global llvmjit 0}
+%else
 %{!?llvmjit:%global llvmjit 1}
+%endif
 %{!?external_libpq:%global external_libpq 0}
 %{!?upgrade:%global upgrade 0}
 %{!?plpython:%global plpython 0}
@@ -27,7 +32,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 13
 Version: %{majorversion}.3
-Release: 3
+Release: 4
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -409,6 +414,9 @@ export CFLAGS
 # since that's still considered the default plpython version.
 common_configure_options='
         --disable-rpath
+%ifarch riscv64
+        --disable-spinlocks
+%endif
 %if %beta
         --enable-debug
         --enable-cassert
@@ -598,6 +606,9 @@ upgrade_configure ()
                 --host=%{_host} \
                 --prefix=%prev_prefix \
                 --disable-rpath \
+%ifarch riscv64
+                --disable-spinlocks \
+%endif
 %if %beta
                 --enable-debug \
                 --enable-cassert \
@@ -1223,6 +1234,10 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Tue Jan 18 2022 lvxiaoqian<xiaoqian@nj.iscas.ac.cn> - 13.3-4
+- Disable spinlocks on RISC-V 64-bit (riscv64)
+- Disable LLVM/Clang for riscv64 (fails tests)
+
 * Tue Aug 3 2021 bzhaoop<bzhaojyathousandy@gmail.com> - 13.3-3
 - Add the missed libpq.so file into postgresql-server-devel package.
 
