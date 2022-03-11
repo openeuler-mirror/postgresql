@@ -32,7 +32,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 13
 Version: %{majorversion}.3
-Release: 4
+Release: 5
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -76,6 +76,8 @@ Patch8: postgresql-external-libpq.patch
 Patch9: postgresql-server-pg_config.patch
 Patch10: postgresql-no-libecpg.patch
 Patch11: postgresql-datalayout-mismatch-on-s390.patch
+Patch12: CVE-2021-23214.patch
+Patch13: CVE-2021-23222.patch
 
 BuildRequires: gcc
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
@@ -348,6 +350,8 @@ goal of accelerating analytics queries.
 %endif
 %patch9 -p1
 %patch11 -p1
+%patch12 -p1
+%patch13 -p1
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -1234,6 +1238,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Fri Mar 11 2022 wangkai <wangkai385@huawei.com> - 13.3-5
+- Fix CVE-2021-23214 CVE-2021-23222
+
 * Tue Jan 18 2022 lvxiaoqian<xiaoqian@nj.iscas.ac.cn> - 13.3-4
 - Disable spinlocks on RISC-V 64-bit (riscv64)
 - Disable LLVM/Clang for riscv64 (fails tests)
