@@ -27,7 +27,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 13
 Version: %{majorversion}.3
-Release: 3
+Release: 4
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -71,6 +71,7 @@ Patch8: postgresql-external-libpq.patch
 Patch9: postgresql-server-pg_config.patch
 Patch10: postgresql-no-libecpg.patch
 Patch11: postgresql-datalayout-mismatch-on-s390.patch
+Patch12: postgresql-subtransaction-test.patch
 
 BuildRequires: gcc
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
@@ -343,6 +344,7 @@ goal of accelerating analytics queries.
 %endif
 %patch9 -p1
 %patch11 -p1
+%patch12 -p1
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -1223,6 +1225,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Fri May 6 2022 caodongxia <caodongxia@h-partners.com> - 13.3-4
+- Fix subtransaction test failed
+
 * Tue Aug 3 2021 bzhaoop<bzhaojyathousandy@gmail.com> - 13.3-3
 - Add the missed libpq.so file into postgresql-server-devel package.
 
