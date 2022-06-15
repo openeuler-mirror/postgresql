@@ -1243,7 +1243,7 @@ make -C postgresql-setup-%{setup_version} check
 * Tue Dec 8 2020 wangxiao <wangxiao65@huawei.com> - 10.5-18
 - Fix CVE-2020-25694 CVE-2020-25695 CVE-2020-25696
 
-* Web Sep 9 2020 yanglongkang<yanglongkang@huawei.com> - 10.5-17
+* Thu Sep 10 2020 yanglongkang <yanglongkang@huawei.com> - 10.5-17
 - Fix CVE-2020-14349 CVE-2020-14350
 
 * Fri Jun 19 2020 cuibaobao <cuibaobao1@huawei.com> - 10.5-16
