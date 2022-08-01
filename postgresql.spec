@@ -1,6 +1,11 @@
 %{!?beta:%global beta 0}
 %{!?test:%global test 1}
+%ifarch riscv64
+# Fail to pass tests on riscv64
+%{!?llvmjit:%global llvmjit 0}
+%else
 %{!?llvmjit:%global llvmjit 1}
+%endif
 %{!?external_libpq:%global external_libpq 0}
 %{!?upgrade:%global upgrade 0}
 %{!?plpython:%global plpython 0}
@@ -27,7 +32,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 13
 Version: %{majorversion}.3
-Release: 4
+Release: 6
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -71,7 +76,9 @@ Patch8: postgresql-external-libpq.patch
 Patch9: postgresql-server-pg_config.patch
 Patch10: postgresql-no-libecpg.patch
 Patch11: postgresql-datalayout-mismatch-on-s390.patch
-Patch12: postgresql-subtransaction-test.patch
+Patch12: CVE-2021-23214.patch
+Patch13: CVE-2021-23222.patch
+Patch14: postgresql-subtransaction-test.patch
 
 BuildRequires: gcc
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
@@ -345,6 +352,8 @@ goal of accelerating analytics queries.
 %patch9 -p1
 %patch11 -p1
 %patch12 -p1
+%patch13 -p1
+%patch14 -p1
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -411,6 +420,9 @@ export CFLAGS
 # since that's still considered the default plpython version.
 common_configure_options='
         --disable-rpath
+%ifarch riscv64
+        --disable-spinlocks
+%endif
 %if %beta
         --enable-debug
         --enable-cassert
@@ -600,6 +612,9 @@ upgrade_configure ()
                 --host=%{_host} \
                 --prefix=%prev_prefix \
                 --disable-rpath \
+%ifarch riscv64
+                --disable-spinlocks \
+%endif
 %if %beta
                 --enable-debug \
                 --enable-cassert \
@@ -1225,8 +1240,17 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
-* Fri May 6 2022 caodongxia <caodongxia@h-partners.com> - 13.3-4
-- Fix subtransaction test failed
+* Mon Aug 1 2022 bzhaoop <bzhaojyathousandy@gmail.com> - 13.3-6
+- Porting "Fix subtransaction test failed" from master branch
+- Fri May 6 2022 caodongxia <caodongxia@h-partners.com> - 13.3-4
+- sync the same line with master
+
+* Fri Mar 11 2022 wangkai <wangkai385@huawei.com> - 13.3-5
+- Fix CVE-2021-23214 CVE-2021-23222
+
+* Tue Jan 18 2022 lvxiaoqian<xiaoqian@nj.iscas.ac.cn> - 13.3-4
+- Disable spinlocks on RISC-V 64-bit (riscv64)
+- Disable LLVM/Clang for riscv64 (fails tests)
 
 * Tue Aug 3 2021 bzhaoop<bzhaojyathousandy@gmail.com> - 13.3-3
 - Add the missed libpq.so file into postgresql-server-devel package.
