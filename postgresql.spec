@@ -32,7 +32,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 13
 Version: %{majorversion}.3
-Release: 5
+Release: 6
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -78,6 +78,7 @@ Patch10: postgresql-no-libecpg.patch
 Patch11: postgresql-datalayout-mismatch-on-s390.patch
 Patch12: CVE-2021-23214.patch
 Patch13: CVE-2021-23222.patch
+Patch14: postgresql-subtransaction-test.patch
 
 BuildRequires: gcc
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
@@ -352,6 +353,7 @@ goal of accelerating analytics queries.
 %patch11 -p1
 %patch12 -p1
 %patch13 -p1
+%patch14 -p1
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -1238,6 +1240,11 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Mon Aug 1 2022 bzhaoop <bzhaojyathousandy@gmail.com> - 13.3-6
+- Porting "Fix subtransaction test failed" from master branch
+- Fri May 6 2022 caodongxia <caodongxia@h-partners.com> - 13.3-4
+- sync the same line with master
+
 * Fri Mar 11 2022 wangkai <wangkai385@huawei.com> - 13.3-5
 - Fix CVE-2021-23214 CVE-2021-23222
 
