@@ -470,7 +470,7 @@ find_lang_bins pltcl.lst pltcl
 - SUG: NA
 - DESC: fix CVE-2020-1720
 
-* Tue Sep 08 2020 daiqianwen <daiqianwen@huawei.com> - 10.5-14
+* Thu Apr 09 2020 daiqianwen <daiqianwen@huawei.com> - 10.5-14
 - Type: enhancement
 - DESC: add postgresql-test-rpm-macros
 
