@@ -1,0 +1,78 @@
+diff -Naur postgresql-13.3.org/contrib/pgcrypto/crypt-blowfish.c postgresql-13.3.sw/contrib/pgcrypto/crypt-blowfish.c
+--- postgresql-13.3.org/contrib/pgcrypto/crypt-blowfish.c	2022-09-16 11:31:15.100000000 +0800
++++ postgresql-13.3.sw/contrib/pgcrypto/crypt-blowfish.c	2022-09-16 11:32:01.060000000 +0800
+@@ -41,7 +41,7 @@
+ #ifdef __i386__
+ #define BF_ASM				0	/* 1 */
+ #define BF_SCALE			1
+-#elif defined(__x86_64__) || defined(__alpha__) || defined(__hppa__)
++#elif defined(__x86_64__) || defined(__alpha__) || defined(__hppa__) || defined(__sw_64__)
+ #define BF_ASM				0
+ #define BF_SCALE			1
+ #else
+diff -Naur postgresql-13.3.org/postgresql-setup-8.5/Makefile.in postgresql-13.3.sw/postgresql-setup-8.5/Makefile.in
+--- postgresql-13.3.org/postgresql-setup-8.5/Makefile.in	2022-09-16 11:31:14.930000000 +0800
++++ postgresql-13.3.sw/postgresql-setup-8.5/Makefile.in	2022-09-16 11:37:09.260000000 +0800
+@@ -459,7 +459,7 @@
+ newunit = sbin/$(NAME_BINARYBASE)-new-systemd-unit
+ newunit_in = sbin/new-systemd-unit.in
+ @WANT_SYSVINIT_FALSE@sbin_SCRIPTS = $(newunit)
+-HELP2MAN = $(SHELL) $(top_srcdir)/$(config_aux_dir)/missing --run help2man
++HELP2MAN = $(SHELL) $(top_srcdir)/$(config_aux_dir)/missing --run help2man --no-discard-stderr
+ 
+ # The help2man call
+ # =================
+diff -Naur postgresql-13.3.org/src/include/port/atomics/arch-sw_64.h postgresql-13.3.sw/src/include/port/atomics/arch-sw_64.h
+--- postgresql-13.3.org/src/include/port/atomics/arch-sw_64.h	1970-01-01 08:00:00.000000000 +0800
++++ postgresql-13.3.sw/src/include/port/atomics/arch-sw_64.h	2022-09-16 13:37:10.630000000 +0800
+@@ -0,0 +1,26 @@
++/*-------------------------------------------------------------------------
++ *
++ * arch-arm.h
++ *	  Atomic operations considerations specific to ARM
++ *
++ * Portions Copyright (c) 2013-2020, PostgreSQL Global Development Group
++ *
++ * NOTES:
++ *
++ * src/include/port/atomics/arch-arm.h
++ *
++ *-------------------------------------------------------------------------
++ */
++
++/* intentionally no include guards, should only be included by atomics.h */
++#ifndef INSIDE_ATOMICS_H
++#error "should be included via atomics.h"
++#endif
++
++/*
++ * 64 bit atomics on ARM32 are implemented using kernel fallbacks and thus
++ * might be slow, so disable entirely. On ARM64 that problem doesn't exist.
++ */
++#if !defined(_sw_64__) 
++#define PG_DISABLE_64_BIT_ATOMICS
++#endif  /* __sw_64__ || __sw_64 */
+diff -Naur postgresql-13.3.org/src/include/port/atomics.h postgresql-13.3.sw/src/include/port/atomics.h
+--- postgresql-13.3.org/src/include/port/atomics.h	2022-09-16 11:31:15.640000000 +0800
++++ postgresql-13.3.sw/src/include/port/atomics.h	2022-09-16 13:36:15.370000000 +0800
+@@ -68,6 +68,8 @@
+ #include "port/atomics/arch-arm.h"
+ #elif defined(__i386__) || defined(__i386) || defined(__x86_64__)
+ #include "port/atomics/arch-x86.h"
++#elif defined(__sw_646__) 
++#include "port/atomics/arch-sw_64.h"
+ #elif defined(__ia64__) || defined(__ia64)
+ #include "port/atomics/arch-ia64.h"
+ #elif defined(__ppc__) || defined(__powerpc__) || defined(__ppc64__) || defined(__powerpc64__)
+diff -Naur postgresql-13.3.org/src/include/storage/s_lock.h postgresql-13.3.sw/src/include/storage/s_lock.h
+--- postgresql-13.3.org/src/include/storage/s_lock.h	2022-09-16 11:31:15.560000000 +0800
++++ postgresql-13.3.sw/src/include/storage/s_lock.h	2022-09-16 11:43:30.940000000 +0800
+@@ -320,7 +320,7 @@
+  * We use the int-width variant of the builtin because it works on more chips
+  * than other widths.
+  */
+-#if defined(__arm__) || defined(__arm) || defined(__aarch64__) || defined(__aarch64)
++#if defined(__arm__) || defined(__arm) || defined(__aarch64__) || defined(__aarch64) || defined(__sw_64__) || defined(__sw_64)
+ #ifdef HAVE_GCC__SYNC_INT32_TAS
+ #define HAS_TEST_AND_SET
+ 
