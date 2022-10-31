@@ -22,7 +22,11 @@
 %{!?pam:%global pam 1}
 %{!?sdt:%global sdt 1}
 %{!?selinux:%global selinux 1}
+%ifarch sw_64
+%{!?runselftest:%global runselftest 0}
+%else
 %{!?runselftest:%global runselftest 1}
+%endif
 
 %global _default_patch_flags --no-backup-if-mismatch
 
@@ -32,7 +36,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 13
 Version: %{majorversion}.3
-Release: 6
+Release: 7
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -79,6 +83,7 @@ Patch11: postgresql-datalayout-mismatch-on-s390.patch
 Patch12: CVE-2021-23214.patch
 Patch13: CVE-2021-23222.patch
 Patch14: postgresql-subtransaction-test.patch
+Patch15: postgresql-13.3-sw.patch
 
 BuildRequires: gcc
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
@@ -354,6 +359,9 @@ goal of accelerating analytics queries.
 %patch12 -p1
 %patch13 -p1
 %patch14 -p1
+%ifarch sw_64
+%patch15 -p1
+%endif
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -1240,6 +1248,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Tue Oct 25 2022 wuzx<wuzx1226@qq.com> - 13.3-7
+- Add sw64 architecture
+
 * Mon Aug 1 2022 bzhaoop <bzhaojyathousandy@gmail.com> - 13.3-6
 - Porting "Fix subtransaction test failed" from master branch
 - Fri May 6 2022 caodongxia <caodongxia@h-partners.com> - 13.3-4
