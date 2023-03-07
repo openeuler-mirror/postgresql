@@ -160,6 +160,35 @@ PostgreSQL server, or on a remote machine that accesses a PostgreSQL server
 over a network connection.  The PostgreSQL server can be found in the
 postgresql-server sub-package.
 
+%if ! %external_libpq
+%package private-libs
+Summary: The shared libraries required only for this build of PostgreSQL server
+Group: Applications/Databases
+# for /sbin/ldconfig
+Requires(post): glibc
+Requires(postun): glibc
+
+%description private-libs
+The postgresql-private-libs package provides the shared libraries for this
+build of PostgreSQL server and plugins build with this version of server.
+For shared libraries used by client packages that need to connect to a
+PostgreSQL server, install libpq package instead.
+
+
+%package private-devel
+Summary: PostgreSQL development header files for this build of PostgreSQL server
+Group: Development/Libraries
+Requires: %{name}-private-libs%{?_isa} = %precise_version
+# Conflict is desired here, a user must pick one or another
+Conflicts: libpq-devel
+
+%description private-devel
+The postgresql-private-devel package contains the header files and libraries
+needed to compile C or C++ applications which will directly interact
+with a PostgreSQL database management server.
+You need to install this package if you want to develop applications which
+will interact with a PostgreSQL server.
+%endif
 
 %package server
 Summary: The programs needed to create and run a PostgreSQL server
@@ -686,6 +715,15 @@ make DESTDIR=$RPM_BUILD_ROOT install-world
 
 # We ship pg_config through libpq-devel
 mv $RPM_BUILD_ROOT/%_mandir/man1/pg_{,server_}config.1
+%if %external_libpq
+rm $RPM_BUILD_ROOT/%_includedir/pg_config*.h
+rm $RPM_BUILD_ROOT/%_includedir/libpq/libpq-fs.h
+rm $RPM_BUILD_ROOT/%_includedir/postgres_ext.h
+rm -r $RPM_BUILD_ROOT/%_includedir/pgsql/internal/
+%else
+ln -s pg_server_config $RPM_BUILD_ROOT/%_bindir/pg_config
+rm $RPM_BUILD_ROOT/%{_libdir}/libpq.a
+%endif
 
 %if %plpython3
         mv src/Makefile.global src/Makefile.global.save
@@ -1151,7 +1189,6 @@ make -C postgresql-setup-%{setup_version} check
 %config(noreplace) /etc/pam.d/postgresql
 %endif
 
-
 %files server-devel -f devel.lst
 %{_bindir}/pg_server_config
 %dir %{_datadir}/pgsql
@@ -1159,14 +1196,28 @@ make -C postgresql-setup-%{setup_version} check
 %dir %{_includedir}/pgsql
 %{_includedir}/pgsql/server
 %{_libdir}/pgsql/pgxs/
-%{_includedir}/*
-%{_libdir}/{pgsql/pgxs/,pkgconfig/*.pc}
-%{_libdir}/{libecpg,libecpg_compat,libpgtypes,libpq}.so*
-%{_libdir}/libpq.a
 %{_mandir}/man1/pg_server_config.*
 %{_mandir}/man3/SPI_*
 %{macrosdir}/macros.%name
 
+%if ! %external_libpq
+%files private-libs
+%{_libdir}/libpq.so.*
+%endif
+
+%if ! %external_libpq
+%files private-devel
+%{_bindir}/pg_config
+%{_includedir}/libpq-events.h
+%{_includedir}/libpq-fe.h
+%{_includedir}/postgres_ext.h
+%{_includedir}/pgsql/internal/*.h
+%{_includedir}/pgsql/internal/libpq/pqcomm.h
+%{_includedir}/libpq/*.h
+%{_libdir}/pkgconfig/*.pc
+%{_libdir}/libpq.so
+%{_includedir}/pg_config*.h
+%endif
 
 %files test-rpm-macros
 %{_datadir}/postgresql-setup/postgresql_pkg_tests.sh
@@ -1244,6 +1295,13 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Tue Mar  7 2023 dillon chen <dillon.chen@gmail.com> - 13.3-7
+- Fix issue: confilct between libpq-devel and postgresql-devel
+- guess init spec from redhat 
+- change redhat spec:rm private package and add files to server-devel
+- so add delete lines to Fix issue
+- Next: write oe libpq and postgresql spec by myself
+
 * Tue Feb 14 2023 dillon chen <dillon.chen@gmail.com> - 13.3-7
 - patch 15,16 for openssl upgrade to 3.0
 
