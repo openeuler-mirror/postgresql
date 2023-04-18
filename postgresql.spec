@@ -1,6 +1,6 @@
 %{!?beta:%global beta 0}
 %{!?test:%global test 1}
-%ifarch riscv64
+%ifarch riscv64 loongarch64
 # Fail to pass tests on riscv64
 %{!?llvmjit:%global llvmjit 0}
 %else
@@ -32,7 +32,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 13
 Version: %{majorversion}.3
-Release: 7
+Release: 8
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -453,7 +453,7 @@ export CFLAGS
 # since that's still considered the default plpython version.
 common_configure_options='
         --disable-rpath
-%ifarch riscv64
+%ifarch riscv64 loongarch64
         --disable-spinlocks
 %endif
 %if %beta
@@ -645,7 +645,7 @@ upgrade_configure ()
                 --host=%{_host} \
                 --prefix=%prev_prefix \
                 --disable-rpath \
-%ifarch riscv64
+%ifarch riscv64 loongarch64
                 --disable-spinlocks \
 %endif
 %if %beta
@@ -1295,6 +1295,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Tue Apr 18 2023 Wenlong Zhang<zhangwenlong@loongson.cn> - 13.3-8
+- Fix build error for loongarch64
+
 * Tue Mar  7 2023 dillon chen <dillon.chen@gmail.com> - 13.3-7
 - Fix issue: confilct between libpq-devel and postgresql-devel
 - guess init spec from redhat 
