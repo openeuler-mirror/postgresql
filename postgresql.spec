@@ -1,5 +1,8 @@
 %{!?beta:%global beta 0}
 %{!?test:%global test 1}
+%if "%toolchain" == "clang"
+%global llvmjit 0
+%endif
 %ifarch riscv64
 # Fail to pass tests on riscv64
 %{!?llvmjit:%global llvmjit 0}
@@ -32,7 +35,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 13
 Version: %{majorversion}.3
-Release: 7
+Release: 8
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -1295,6 +1298,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Thu May 25 2023 yoo <sunyuechi@iscas.ac.cn> - %{majorversion}.3-8
+- fix clang build error
+
 * Tue Mar  7 2023 dillon chen <dillon.chen@gmail.com> - 13.3-7
 - Fix issue: confilct between libpq-devel and postgresql-devel
 - guess init spec from redhat 
